@@ -84,7 +84,6 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <button data-step="1">1 타깃 선택</button>
     <button data-step="2">2 내용 구성</button>
     <button data-step="3">3 결과물</button>
-    <button data-step="5">받은 글 검수</button>
     <button data-step="6">사실 목록</button>
     <button data-step="7">자료 저장소</button>
   </nav>
@@ -100,13 +99,9 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
       <input type="text" id="customTarget" placeholder="예: 직원 10명 규모의 여행사 예약 상담팀" style="flex:1 1 280px" maxlength="200" aria-label="고객 설명">
       <button class="ghost" id="planBtn">타깃 추가</button>
     </div>
-    <h3>가이드라인</h3>
+    <h3>적용 중인 가이드라인</h3>
     <p class="sub" id="guideSummary"></p>
-    <div class="row">
-      <input type="file" id="guideFile" accept=".xlsx" aria-label="가이드라인 엑셀 파일">
-      <button class="ghost" id="guideUpload">가이드라인 업로드</button>
-    </div>
-    <p class="small">올리지 않으면 저장된 티링크 가이드라인을 씁니다.</p>
+    <p class="small">가이드라인은 글에 꼭 들어가야 할 키워드와 강조 항목을 정한 문서입니다. [자료 저장소]에서 바꿀 수 있습니다.</p>
     <div class="row" style="margin-top:14px"><button class="go" id="to2" disabled>다음: 내용 구성</button></div>
   </section>
 
@@ -135,6 +130,17 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <div class="row"><label for="agents">상담원 수</label><input type="number" id="agents" min="1" max="10000" value="5" style="width:100px"><button class="ghost" id="recalc">재계산</button></div>
     <div id="quote"></div>
     </div>
+    <details id="recvBox" style="margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:10px 14px">
+      <summary style="cursor:pointer;font-weight:700">체험단 글 검수 <span class="small" style="font-weight:400">· 받은 글이 위 내용과 맞는지 확인</span></summary>
+      <p class="sub" style="margin-top:8px">체험단이 써 온 글이나 이미 올린 글을 붙여 넣으면, 이 타깃의 내용·조건과 가이드라인을 기준으로 검사합니다.</p>
+      <div class="row" style="margin-bottom:8px"><button class="ghost" id="sample">예시 글 입력</button></div>
+      <label for="pTitle" class="small">제목</label>
+      <input type="text" id="pTitle" style="width:100%;margin-bottom:8px">
+      <label for="pBody" class="small">본문</label>
+      <textarea id="pBody" style="min-height:160px"></textarea>
+      <div class="row" style="margin:10px 0"><button class="go" id="pCheck">검수</button><label class="small"><input type="checkbox" id="ai5"> AI 의미 검수 포함</label></div>
+      <div id="report5"></div>
+    </details>
     <h3>결과물 생성</h3>
     <p class="small">블로그 글(네이버·티스토리용) 한 편과 인스타 캐러셀(넘겨 보는 카드, 게시물 문구, 해시태그 5개 이내)을 함께 만듭니다.</p>
     <div class="row" style="margin-top:8px"><button class="go" id="makeBoth">결과물 생성</button><label class="small"><input type="checkbox" id="useStored"> 저장된 초안 쓰기 (AI를 부르지 않음)</label></div>
@@ -183,7 +189,7 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <input type="text" id="fTitle" style="width:100%;margin-bottom:8px">
     <label for="fBody" class="small">본문</label>
     <textarea id="fBody"></textarea>
-    <div class="row" style="margin:10px 0"><button class="go" id="recheck">재검수</button><label class="small"><input type="checkbox" id="ai4"> AI 의미 검수도 하기</label><button class="ghost" id="download" disabled>글 다운로드 (.md)</button><button class="ghost" id="copy" disabled>글 복사</button><button class="ghost" id="copyRich" disabled>서식 포함 복사 (네이버·티스토리)</button><span class="small" id="dlHint"></span></div>
+    <div class="row" style="margin:10px 0"><button class="go" id="recheck">재검수</button><label class="small"><input type="checkbox" id="ai4"> AI 의미 검수 포함</label><button class="ghost" id="download" disabled>글 다운로드 (.md)</button><button class="ghost" id="copy" disabled>글 복사</button><button class="ghost" id="copyRich" disabled>서식 포함 복사 (네이버·티스토리)</button><span class="small" id="dlHint"></span></div>
     <div id="report4"></div>
     <h3>완성본 미리보기</h3>
     <p class="sub">블로그에 올렸을 때의 모습입니다. 실제 게시는 하지 않습니다.</p>
@@ -191,23 +197,13 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <h3>소제목 아래에 넣을 이미지</h3>
     <p class="sub">자료 저장소의 이미지를 고르면 미리보기에 들어갑니다. 블로그에는 이미지를 직접 올려야 하며, 내려받은 글에는 넣을 위치와 파일 이름이 표시됩니다.</p>
     <div id="blogImgs"></div>
+    <div class="row" style="margin-top:8px"><button class="ghost" id="blogImgDl">넣은 이미지 다운로드 (PNG)</button><span class="small">'예시 그림'은 실제 화면이 아니라 설명용 그림입니다. 실제 화면처럼 소개하지 마세요.</span></div>
     </div>
     </div>
    </div>
   </section>
 
 
-  <section id="s5" class="card" hidden>
-    <h2>받은 글 검수</h2>
-    <p class="sub">체험단이 써 온 글이나 이미 올린 글을 붙여 넣으면 같은 기준으로 검사합니다.</p>
-    <div class="row" style="margin-bottom:8px"><label for="pTarget" class="small">타깃</label><select id="pTarget" style="font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line)"></select><button class="ghost" id="sample">예시 글 입력</button></div>
-    <label for="pTitle" class="small">제목</label>
-    <input type="text" id="pTitle" style="width:100%;margin-bottom:8px">
-    <label for="pBody" class="small">본문</label>
-    <textarea id="pBody"></textarea>
-    <div class="row" style="margin:10px 0"><button class="go" id="pCheck">검수</button><label class="small"><input type="checkbox" id="ai5"> AI 의미 검수도 하기</label></div>
-    <div id="report5"></div>
-  </section>
 
   <section id="s6" class="card" hidden>
     <h2>사실 목록</h2>
@@ -227,6 +223,10 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <p class="small">PDF, PPTX, DOCX, XLSX, TXT · 30MB 이하. 분석에 1~2분 걸립니다.</p>
     <div id="docResult"></div>
     <table style="margin-top:8px"><thead><tr><th>문서</th><th>쪽수</th><th>뽑은 사실</th><th>넣은 날</th><th></th></tr></thead><tbody id="docList"></tbody></table>
+    <h3 style="margin-top:26px">가이드라인</h3>
+    <p class="sub">글이 지켜야 할 규칙(필수 키워드, 강조 항목, 하단 정보)을 적은 엑셀입니다. 사실을 뽑는 사내 문서와는 쓰임이 다릅니다. 올리지 않으면 저장된 티링크 가이드라인을 씁니다.</p>
+    <div class="row"><input type="file" id="guideFile" accept=".xlsx" aria-label="가이드라인 엑셀 파일"><button class="go" id="guideUpload">가이드라인 교체</button></div>
+    <p class="small" id="guideSummary2"></p>
     <h3 style="margin-top:26px">홍보 이미지</h3>
     <p class="sub">실제 서비스 화면, 제품 사진입니다. 인스타 카드의 배경과 블로그 글의 소제목 아래에 골라 넣습니다.</p>
     <div class="row"><input type="file" id="assetFile" accept="image/png,image/jpeg,image/webp" aria-label="홍보 이미지 파일"><input type="text" id="assetCaption" placeholder="무엇이 보이는 이미지인가요? 예: AI 통화요약 화면" style="flex:1 1 240px" maxlength="120" aria-label="이미지 설명"><button class="go" id="assetAdd">이미지 추가</button></div>
@@ -244,7 +244,7 @@ const src = (f) => {
 const won = (n) => Number(n).toLocaleString("ko-KR") + "원";
 const VERDICT = {pass: "통과", fail: "실패", check: "확인 필요"};
 const STATUS = {confirmed: ["확정", "pass"], conflict: ["확인 필요", "fail"], claim: ["회사 주장", "check"], pending: ["확정 대기", "check"]};
-const S = {must: [], assets: [], imgs: new Map(), blogImg: {}, mode: "blog", car: null, step: 1, target: null, state: null, draft: null, facts: null, reached: 1};
+const S = {real: [], must: [], assets: [], imgs: new Map(), blogImg: {}, mode: "blog", car: null, step: 1, target: null, state: null, draft: null, facts: null, reached: 1};
 
 async function api(path, options) {
   $("error").hidden = true;
@@ -263,7 +263,7 @@ function fail(error) { $("error").textContent = error.message; $("error").hidden
 
 function show(step) {
   S.step = step; if (step <= 3) S.reached = Math.max(S.reached, step);
-  for (const i of [1, 2, 3, 5, 6, 7]) $("s" + i).hidden = i !== step;
+  for (const i of [1, 2, 3, 6, 7]) $("s" + i).hidden = i !== step;
   document.querySelectorAll(".steps button").forEach((b) => {
     const n = Number(b.dataset.step);
     b.toggleAttribute("aria-current", false);
@@ -274,14 +274,13 @@ function show(step) {
 
 function renderGuide(g) {
   const waiting = g.emphasis.filter((e) => !e.confirmed).length;
-  $("guideSummary").textContent = `필수 키워드 ${g.required_keywords.length}개(${g.required_keywords.join(", ")}), 강조 항목 ${g.emphasis.length}개` +
+  $("guideSummary2").textContent = $("guideSummary").textContent = `필수 키워드 ${g.required_keywords.length}개(${g.required_keywords.join(", ")}), 강조 항목 ${g.emphasis.length}개` +
     (waiting ? `. 강조 항목을 알아보는 낱말 ${waiting}개는 담당자 확인 전입니다.` : ".");
 }
 
 const TARGET_NOTE = {proposed: "제안 · 담당자 확인 전", ai: "AI가 고른 묶음 · 확인 전"};
 function renderTargets() {
   $("targets").innerHTML = S.state.targets.map((t) => `<button class="pick" data-id="${esc(t.id)}" aria-pressed="${t.id === S.target}"><b>${esc(t.name)}</b><span class="small">${TARGET_NOTE[t.status] || "확인됨"}</span></button>`).join("");
-  $("pTarget").innerHTML = `<option value="">타깃 없이</option>` + S.state.targets.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
   document.querySelectorAll(".pick").forEach((b) => b.addEventListener("click", () => {
     S.target = b.dataset.id; S.reached = 1; S.draft = null; S.must = []; renderMust();
     document.querySelectorAll(".pick").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
@@ -311,28 +310,90 @@ function richHtml(title, body) {
   }
   return html;
 }
+// Built-in vector illustrations: generic app-style pictures in the brand colours, for when the company
+// has no promo image yet. They are drawings, not real product screens, and each carries an "예시 그림" label.
+const ART = [
+  {id: "art-calls", caption: "통화 목록 (예시 그림)", words: ["녹취", "녹음", "통화", "기록", "서버", "보관"]},
+  {id: "art-summary", caption: "통화 요약 (예시 그림)", words: ["요약", "STT", "문자변환", "키워드", "글로", "자동"]},
+  {id: "art-dashboard", caption: "경영 대시보드 (예시 그림)", words: ["대시보드", "리포트", "경영", "지표", "분석", "영업기회"]},
+  {id: "art-phone", caption: "휴대폰 통화 (예시 그림)", words: ["휴대폰", "모바일", "외근", "스마트폰", "개인 폰", "현장"]},
+  {id: "art-report", caption: "보고서 (예시 그림)", words: ["보고서", "평가", "교육", "인사", "역량", "문서"]},
+  {id: "art-team", caption: "상담원 통계 (예시 그림)", words: ["상담원", "통계", "통화량", "직원", "관리", "고객"]},
+];
+function artSvg(kind) {
+  const b = S.state.brand, navy = b.background, acc = b.accent, soft = "#e9eefb", line = "#cfd8f0", ink = "#33405f";
+  const win = (x, y, w, h, inner) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="22" fill="#fff" stroke="${line}" stroke-width="3"/><rect x="${x}" y="${y}" width="${w}" height="54" rx="22" fill="${navy}"/><rect x="${x}" y="${y + 30}" width="${w}" height="24" fill="${navy}"/><circle cx="${x + 34}" cy="${y + 27}" r="8" fill="${acc}"/><circle cx="${x + 62}" cy="${y + 27}" r="8" fill="#fff" opacity=".5"/>${inner}`;
+  const bar = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(h, w) / 2}" fill="${c}"/>`;
+  let body = "";
+  if (kind === "art-calls") {
+    let rows = ""; for (let i = 0; i < 6; i++) { const y = 250 + i * 78; rows += `<circle cx="210" cy="${y + 20}" r="20" fill="${i % 2 ? acc : navy}"/><path d="M203 ${y + 10} l16 10 l-16 10z" fill="#fff"/>` + bar(250, y + 4, 300 - i * 22, 16, ink) + bar(250, y + 28, 420, 12, line) + bar(820, y + 8, 110, 26, i % 3 ? soft : acc) + bar(960, y + 14, 70, 14, line); }
+    body = win(140, 150, 920, 580, bar(180, 222, 160, 12, line) + bar(820, 222, 110, 12, line) + rows);
+  } else if (kind === "art-summary") {
+    let chat = ""; for (let i = 0; i < 4; i++) { const y = 240 + i * 108, left = i % 2 === 0; chat += `<rect x="${left ? 180 : 300}" y="${y}" width="330" height="78" rx="20" fill="${left ? soft : navy}"/>` + bar(left ? 204 : 324, y + 22, 250, 12, left ? ink : "#fff") + bar(left ? 204 : 324, y + 46, 170, 12, left ? line : acc); }
+    body = win(140, 150, 920, 580, chat + `<rect x="680" y="234" width="340" height="456" rx="20" fill="${soft}"/>` + bar(708, 264, 130, 20, navy) + bar(708, 312, 284, 14, ink) + bar(708, 340, 250, 14, ink) + bar(708, 368, 270, 14, ink) + bar(708, 430, 100, 16, navy) + bar(708, 468, 96, 34, acc) + bar(816, 468, 120, 34, acc) + bar(708, 514, 130, 34, acc) + bar(708, 590, 284, 14, line) + bar(708, 618, 200, 14, line));
+  } else if (kind === "art-dashboard") {
+    let cards = "", bars = ""; for (let i = 0; i < 3; i++) cards += `<rect x="${180 + i * 286}" y="234" width="262" height="120" rx="18" fill="${i === 1 ? navy : soft}"/>` + bar(204 + i * 286, 258, 110, 12, i === 1 ? acc : ink) + bar(204 + i * 286, 292, 150, 30, i === 1 ? "#fff" : navy);
+    [140, 220, 170, 280, 240, 310, 200].forEach((h, i) => { bars += `<rect x="${212 + i * 62}" y="${680 - h}" width="38" height="${h}" rx="10" fill="${i === 5 ? navy : acc}"/>`; });
+    body = win(140, 150, 920, 580, cards + `<rect x="180" y="380" width="480" height="320" rx="18" fill="#fff" stroke="${line}" stroke-width="3"/>` + bars + `<circle cx="858" cy="540" r="112" fill="none" stroke="${soft}" stroke-width="46"/><circle cx="858" cy="540" r="112" fill="none" stroke="${navy}" stroke-width="46" stroke-dasharray="430 704" transform="rotate(-90 858 540)"/><circle cx="858" cy="540" r="112" fill="none" stroke="${acc}" stroke-width="46" stroke-dasharray="150 704" stroke-dashoffset="-430" transform="rotate(-90 858 540)"/>`);
+  } else if (kind === "art-phone") {
+    let wave = ""; [30, 70, 110, 60, 130, 90, 40, 100, 70, 30].forEach((h, i) => { wave += `<rect x="${262 + i * 24}" y="${470 - h / 2}" width="12" height="${h}" rx="6" fill="${i % 3 ? acc : "#fff"}"/>`; });
+    body = `<rect x="210" y="110" width="340" height="620" rx="54" fill="${navy}"/><rect x="232" y="150" width="296" height="540" rx="34" fill="#16245c"/><circle cx="380" cy="270" r="56" fill="${acc}"/>` + bar(310, 350, 140, 16, "#fff") + bar(330, 380, 100, 12, acc) + wave + `<circle cx="380" cy="620" r="40" fill="#e5484d"/><path d="M360 620 h40" stroke="#fff" stroke-width="10" stroke-linecap="round"/>` +
+      `<path d="M590 420 h150" stroke="${navy}" stroke-width="10" stroke-linecap="round" stroke-dasharray="4 26"/><path d="M736 396 l34 24 l-34 24z" fill="${navy}"/>` +
+      `<rect x="800" y="250" width="260" height="340" rx="24" fill="#fff" stroke="${line}" stroke-width="3"/>` + [0, 1, 2].map((i) => `<rect x="830" y="${284 + i * 96}" width="200" height="72" rx="14" fill="${i === 0 ? navy : soft}"/><circle cx="862" cy="${320 + i * 96}" r="10" fill="${acc}"/>` + bar(886, 312 + i * 96, 110, 14, i === 0 ? "#fff" : ink)).join("");
+  } else if (kind === "art-report") {
+    let stars = ""; for (let r = 0; r < 4; r++) for (let i = 0; i < 5; i++) stars += `<circle cx="${700 + i * 44}" cy="${330 + r * 74}" r="15" fill="${i < 4 - (r % 2) ? acc : soft}"/>`;
+    body = `<rect x="250" y="110" width="700" height="620" rx="22" fill="#fff" stroke="${line}" stroke-width="3"/><rect x="250" y="110" width="700" height="120" rx="22" fill="${navy}"/><rect x="250" y="200" width="700" height="30" fill="${navy}"/>` + bar(292, 152, 280, 24, "#fff") + bar(292, 190, 180, 14, acc) + [0, 1, 2, 3].map((r) => bar(292, 320 + r * 74, 130, 16, ink) + bar(292, 346 + r * 74, 340 - r * 40, 12, line)).join("") + stars + bar(292, 640, 616, 14, line) + bar(292, 668, 480, 14, line);
+  } else {
+    let rows = ""; [0.9, 0.62, 0.78, 0.45, 0.7].forEach((v, i) => { const y = 250 + i * 92; rows += `<circle cx="218" cy="${y + 30}" r="30" fill="${i % 2 ? acc : navy}"/><circle cx="218" cy="${y + 22}" r="10" fill="#fff"/><path d="M200 ${y + 50} a18 14 0 0 1 36 0z" fill="#fff"/>` + bar(272, y + 8, 150, 16, ink) + bar(272, y + 38, 660, 22, soft) + bar(272, y + 38, 660 * v, 22, i === 0 ? navy : acc); });
+    body = win(140, 150, 920, 580, rows);
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800"><rect width="1200" height="800" fill="#f3f6fd"/><circle cx="1080" cy="120" r="170" fill="${acc}" opacity=".22"/><circle cx="110" cy="720" r="130" fill="${navy}" opacity=".08"/>${body}<rect x="1020" y="738" width="150" height="40" rx="20" fill="#fff" opacity=".9"/><text x="1095" y="765" text-anchor="middle" font-size="22" font-family="sans-serif" fill="${ink}">예시 그림</text></svg>`;
+}
+function withArt(real) {
+  const art = ART.map((a) => ({id: a.id, caption: a.caption, filename: a.id + ".svg", url: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(artSvg(a.id)), art: true}));
+  return [...real, ...art];
+}
 function assetOptions(selected) { return `<option value="">배경 이미지 없음</option>` + S.assets.map((a) => `<option value="${esc(a.id)}"${a.id === selected ? " selected" : ""}>${esc(a.caption)}</option>`).join(""); }
-function suggestAsset(text) {
+function suggestAsset(text, fallbackIndex, used) {
   let best = "", top = 0;
-  for (const a of S.assets) { const score = a.caption.split(/\s+/).filter((w) => w.length >= 2 && text.includes(w)).length; if (score > top) { top = score; best = a.id; } }
-  return top >= 2 ? best : "";
+  for (const a of S.assets.filter((x) => !x.art)) { const score = a.caption.split(/\s+/).filter((w) => w.length >= 2 && text.includes(w)).length; if (score > top) { top = score; best = a.id; } }
+  if (top >= 2) return best;
+  const free = ART.filter((a) => !(used && used.has(a.id)));  // do not repeat a picture while others are unused
+  let art = "", hits = 0;
+  for (const a of free) { const n = a.words.filter((w) => text.includes(w)).length; if (n > hits) { hits = n; art = a.id; } }
+  if (!art && fallbackIndex !== undefined) art = (free[0] || ART[fallbackIndex % ART.length]).id;
+  if (art && used) used.add(art);
+  return art;
 }
 async function loadAssets() {
-  S.assets = await api("/api/assets");
+  S.real = await api("/api/assets"); S.assets = withArt(S.real);
   for (const a of S.assets) if (!S.imgs.has(a.id)) { const im = new Image(); im.src = a.url; S.imgs.set(a.id, im); }
 }
 function renderAssets() {
-  $("assetGrid").innerHTML = S.assets.map((a) => `<div class="asset"><img src="${esc(a.url)}" alt="${esc(a.caption)}"><div style="margin-top:6px">${esc(a.caption)}</div><div class="small">${esc(a.filename)}</div><button class="ghost" data-del="${esc(a.id)}" style="margin-top:6px;padding:4px 10px;font-size:13px">삭제</button></div>`).join("") || `<p class="small">아직 넣은 자료가 없습니다.</p>`;
+  $("assetGrid").innerHTML = S.real.map((a) => `<div class="asset"><img src="${esc(a.url)}" alt="${esc(a.caption)}"><div style="margin-top:6px">${esc(a.caption)}</div><div class="small">${esc(a.filename)}</div><button class="ghost" data-del="${esc(a.id)}" style="margin-top:6px;padding:4px 10px;font-size:13px">삭제</button></div>`).join("") || `<p class="small">아직 넣은 이미지가 없습니다. 이미지가 없어도 결과물에는 회사 색으로 그린 예시 그림 ${ART.length}종이 들어갑니다. 실제 서비스 화면을 넣으면 그 이미지가 먼저 쓰입니다.</p>`;
   $("assetGrid").querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => { try { await api(`/api/assets/${b.dataset.del}`, {method: "DELETE"}); await loadAssets(); renderAssets(); } catch (e) { fail(e); } }));
 }
 function renderBlogImgs() {
   const heads = $("fBody").value.split("\n").map((l) => l.trim()).filter((l) => l.startsWith("■")).map((l) => l.slice(1).trim());
-  if (!S.assets.length) { $("blogImgs").innerHTML = `<p class="small">자료 저장소에 이미지를 넣으면 여기서 고를 수 있습니다.</p>`; return; }
-  heads.forEach((h) => { if (!(h in S.blogImg)) S.blogImg[h] = suggestAsset(h); });
+  const usedHere = new Set(Object.values(S.blogImg).filter(Boolean));
+  heads.forEach((h) => { if (!(h in S.blogImg)) S.blogImg[h] = suggestAsset(h, undefined, usedHere); });
   $("blogImgs").innerHTML = heads.map((h, i) => `<label class="small">${esc(h)}<select data-head="${i}">${assetOptions(S.blogImg[h])}</select></label>`).join("");
   $("blogImgs").querySelectorAll("select").forEach((s) => s.addEventListener("change", () => { S.blogImg[heads[Number(s.dataset.head)]] = s.value; $("preview").innerHTML = previewHtml($("fTitle").value, $("fBody").value); }));
   $("preview").innerHTML = previewHtml($("fTitle").value, $("fBody").value);
 }
+function savePng(source, name) {
+  const im = new Image();
+  im.onload = () => {
+    const c = document.createElement("canvas"); c.width = im.naturalWidth || 1200; c.height = im.naturalHeight || 800; c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    c.toBlob((blob) => { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }, "image/png");
+  };
+  im.src = source;
+}
+$("blogImgDl").addEventListener("click", () => {
+  const used = [...new Set(Object.values(S.blogImg).filter(Boolean))].map((id) => S.assets.find((a) => a.id === id)).filter(Boolean);
+  if (!used.length) { $("dlHint").textContent = "넣은 이미지가 없습니다."; return; }
+  used.forEach((a, i) => savePng(a.url, `blog_image_${i + 1}.png`));
+});
 $("assetAdd").addEventListener("click", () => {
   const file = $("assetFile").files[0];
   if (!file) { fail(new Error("넣을 이미지 파일을 먼저 골라 주세요.")); return; }
@@ -438,24 +499,31 @@ function drawCard(canvas, slide, index, total) {
   const b = S.state.brand, W = 1080, H = 1350, ctx = canvas.getContext("2d");
   canvas.width = W; canvas.height = H;
   const font = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  const img = slide.asset ? S.imgs.get(slide.asset) : null, ready = img && img.complete && img.naturalWidth;
+  const isArt = ready && slide.asset.startsWith("art-");
   ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H);
-  const img = slide.asset ? S.imgs.get(slide.asset) : null;
-  if (img && img.complete && img.naturalWidth) {
+  if (ready && !isArt) {  // a real photo fills the card under a dark veil so the words stay readable
     const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * scale, h = img.naturalHeight * scale;
     ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
-    ctx.globalAlpha = 0.72; ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.78; ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
   }
   ctx.fillStyle = b.accent; ctx.fillRect(80, 150, 90, 8);
   ctx.textBaseline = "top"; ctx.fillStyle = b.text;
   ctx.font = `700 34px ${font}`; ctx.fillText(b.name, 80, 80);
   ctx.globalAlpha = 0.7; ctx.textAlign = "right"; ctx.font = `500 32px ${font}`; ctx.fillText(`${index} / ${total}`, W - 80, 82); ctx.textAlign = "left"; ctx.globalAlpha = 1;
-  let y = 420;
-  ctx.fillStyle = b.accent; ctx.font = `700 40px ${font}`; ctx.fillText(slide.kicker, 80, y); y += 84;
-  ctx.fillStyle = b.text; ctx.font = `800 96px ${font}`;
-  for (const line of wrapLines(ctx, slide.headline, W - 160)) { ctx.fillText(line, 80, y); y += 124; }
-  y += 36; ctx.globalAlpha = 0.9; ctx.font = `400 44px ${font}`;
-  for (const line of wrapLines(ctx, slide.body, W - 160)) { ctx.fillText(line, 80, y); y += 66; }
-  ctx.globalAlpha = 0.55; ctx.font = `400 28px ${font}`; ctx.fillText("회사 자료에 근거해 만든 광고", 80, H - 110); ctx.globalAlpha = 1;
+  let y = isArt ? 220 : 420;
+  const big = isArt ? 84 : 96;
+  ctx.fillStyle = b.accent; ctx.font = `700 40px ${font}`; ctx.fillText(slide.kicker, 80, y); y += 78;
+  ctx.fillStyle = b.text; ctx.font = `800 ${big}px ${font}`;
+  for (const line of wrapLines(ctx, slide.headline, W - 160)) { ctx.fillText(line, 80, y); y += Math.round(big * 1.28); }
+  y += 30; ctx.globalAlpha = 0.9; ctx.font = `400 ${isArt ? 40 : 44}px ${font}`;
+  for (const line of wrapLines(ctx, slide.body, W - 160)) { ctx.fillText(line, 80, y); y += isArt ? 60 : 66; }
+  ctx.globalAlpha = 1;
+  if (isArt) {  // an illustration sits in its own panel below the words
+    const pw = 720, ph = 480, px = W - 80 - pw, py = Math.max(y + 40, H - 90 - ph), r = 28;
+    ctx.save(); ctx.beginPath(); ctx.roundRect(px, py, pw, ph, r); ctx.clip(); ctx.drawImage(img, px, py, pw, ph); ctx.restore();
+  }
+  ctx.globalAlpha = 0.55; ctx.fillStyle = b.text; ctx.font = `400 26px ${font}`; ctx.fillText("회사 자료에 근거해 만든 광고", 80, H - 64); ctx.globalAlpha = 1;
 }
 function carSlides() {
   return [...document.querySelectorAll(".cardbox")].map((box) => ({kicker: box.querySelector(".k").value, headline: box.querySelector(".h").value, body: box.querySelector(".b").value, asset: box.querySelector(".img").value}));
@@ -468,7 +536,8 @@ function carGate(r) {
 }
 function renderCarousel(d) {
   $("carSource").innerHTML = d.source !== "stored" ? `<div class="info">AI(${esc(d.source)})가 방금 쓴 캐러셀입니다. 카드 ${d.slides.length}장이 사실 잠금 검사를 통과했고 ${d.dropped.length}개가 빠졌습니다.</div>` : `<div class="note">미리 저장해 둔 캐러셀을 불러왔습니다. ${esc(d.fallback_message)}</div>`;
-  $("cards").innerHTML = d.slides.map((s, i) => `<div class="cardbox"><canvas aria-label="카드 ${i + 1}"></canvas><input class="k" value="${esc(s.kicker)}" maxlength="10" aria-label="카드 ${i + 1} 머리말"><textarea class="h" maxlength="60" aria-label="카드 ${i + 1} 제목">${esc(s.headline)}</textarea><textarea class="b" maxlength="200" aria-label="카드 ${i + 1} 본문">${esc(s.body)}</textarea><select class="img" aria-label="카드 ${i + 1} 배경 이미지">${assetOptions(suggestAsset(s.headline + " " + s.body))}</select><div>${s.fact_ids.map((id) => `<button class="chip" data-fact="${esc(id)}">${esc(id)}</button>`).join("")}</div></div>`).join("");
+  const usedArt = new Set();
+  $("cards").innerHTML = d.slides.map((s, i) => `<div class="cardbox"><canvas aria-label="카드 ${i + 1}"></canvas><input class="k" value="${esc(s.kicker)}" maxlength="10" aria-label="카드 ${i + 1} 머리말"><textarea class="h" maxlength="60" aria-label="카드 ${i + 1} 제목">${esc(s.headline)}</textarea><textarea class="b" maxlength="200" aria-label="카드 ${i + 1} 본문">${esc(s.body)}</textarea><select class="img" aria-label="카드 ${i + 1} 배경 이미지">${assetOptions(suggestAsset(s.headline + " " + s.body, i, usedArt))}</select><div>${s.fact_ids.map((id) => `<button class="chip" data-fact="${esc(id)}">${esc(id)}</button>`).join("")}</div></div>`).join("");
   const boxes = [...document.querySelectorAll(".cardbox")];
   const paint = () => carSlides().forEach((s, i) => drawCard(boxes[i].querySelector("canvas"), s, i + 1, boxes.length));
   paint();
@@ -589,12 +658,11 @@ $("download").addEventListener("click", () => {
 });
 $("pCheck").addEventListener("click", () => {
   if (!$("pBody").value.trim()) { fail(new Error("검수할 글을 붙여 넣어 주세요.")); return; }
-  busy($("pCheck"), "검수하는 중…", () => check($("pTitle"), $("pBody"), $("pTarget").value, $("report5"), $("ai5").checked));
+  busy($("pCheck"), "검수하는 중…", () => check($("pTitle"), $("pBody"), S.target, $("report5"), $("ai5").checked));
 });
 $("sample").addEventListener("click", () => {
   $("pTitle").value = "월 2만 원으로 시작하는 고객관리 프로그램 소개";
   $("pBody").value = "안녕하세요. 오늘은 고객관리 프로그램을 소개합니다.\n전화가 오면 고객 정보가 바로 뜨고 상담 이력을 한 화면에서 관리합니다.\n휴대폰 통화녹음은 아이폰과 갤럭시 모두에서 됩니다.\nA타입은 상담원당 월 30,000원이고 설치비는 20만 원입니다.\n[이미지 삽입: 고객 조회 화면]\n전국 학교 200여 곳이 사용하는 업계 최고 솔루션입니다.\n[이미지 삽입: 문자 발송 화면]\n상담 문의: 1877-3836";
-  $("pTarget").value = "";
 });
 $("guideUpload").addEventListener("click", async () => {
   const file = $("guideFile").files[0];
