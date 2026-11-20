@@ -176,9 +176,7 @@ FACTS = [
         "통화 통계는 총 통화, 수신·발신, 평균 통화시간, 담당자별 통화량을 보여 줍니다.",
         "CRM 매뉴얼",
     ),
-    fact(
-        "FEAT-HISTORY", "feature", "고객 화면에 그 고객의 상담·통화·문자·주문 이력이 쌓입니다.", "CRM 매뉴얼"
-    ),
+    fact("FEAT-HISTORY", "feature", "고객 화면에 그 고객의 상담·통화·문자·주문 이력이 쌓입니다.", "CRM 매뉴얼"),
     fact(
         "FEAT-REASSIGN",
         "feature",
@@ -246,6 +244,171 @@ FACTS = [
         "feature",
         "티링크 콜백은 모든 상담원이 통화 중일 때 고객을 대기시키고 통화 대기 목록을 보여 줍니다.",
         f"{SITE} 티링크 콜백",
+    ),
+    # school recording
+    fact(
+        "PROD-SCHOOL",
+        "product",
+        "학교용 녹취는 녹취서버 1대로 교내 인터넷전화 전체를 녹음하는 구매형 상품입니다.",
+        f"{SITE} 학교용 녹취",
+        anchors=["학교용 녹취", "티링크레코딩"],
+        scope="학교",
+    ),
+    fact(
+        "FEAT-SCHOOL-ID",
+        "feature",
+        "선생님마다 개인 계정이 주어져 본인 통화만 확인하고, 전체 확인은 관리자만 할 수 있습니다.",
+        f"{SITE} 학교용 녹취",
+        scope="학교",
+    ),
+    fact(
+        "FEAT-SCHOOL-NET",
+        "feature",
+        "학교용 녹취서버는 학내망에서만 접속할 수 있습니다.",
+        f"{SITE} 학교용 녹취",
+        scope="학교",
+    ),
+    fact(
+        "FEAT-SCHOOL-KEEP",
+        "feature",
+        "학교용 녹취는 통신사가 바뀌어도 기존 녹취파일을 보관합니다.",
+        f"{SITE} 학교용 녹취",
+        scope="학교",
+    ),
+    fact(
+        "FEAT-SCHOOL-LOG",
+        "feature",
+        "누가 언제 어떤 녹음을 들었는지 재생 기록이 남습니다.",
+        f"{SITE} 학교용 녹취",
+        scope="학교",
+    ),
+    fact(
+        "PAIN-SCHOOL",
+        "pain",
+        "녹음되는 전화기가 민원실에만 있어 민원 전화를 받으면 자리를 옮겨야 합니다.",
+        f"{SITE} 학교용 녹취",
+    ),
+    fact(
+        "PAIN-SCHOOL-COMPLAINT",
+        "pain",
+        "일부 학부모의 악성 민원이 교육 활동 침해를 넘어 선생님 개인에게까지 이어지고 있습니다.",
+        f"{SITE} 학교용 녹취",
+    ),
+    fact(
+        "PRICE-SCHOOL",
+        "price",
+        "학교용 녹취서버는 교내 전화기 전체 기준 1,500,000원이며 구축 시 1회만 청구하고 월 사용요금이 없습니다.",
+        f"{SITE} 학교용 녹취",
+        values=won(1_500_000),
+        anchors=["학교용 녹취서버", "구축 비용"],
+        requires=["COND-SCHOOL-ENV"],
+        pricing={"monthly": 0, "per_agent": False, "setup": 1_500_000, "min_agents": 1},
+        scope="학교",
+    ),
+    fact(
+        "COND-SCHOOL-ENV",
+        "condition",
+        "학교용 녹취의 실제 견적은 학교 환경에 따라 달라질 수 있습니다.",
+        f"{SITE} 학교용 녹취",
+        markers=["환경에 따라"],
+    ),
+    # callback, small office
+    fact(
+        "PROD-CALLBACK",
+        "product",
+        "티링크 콜백은 부재중 통화를 모아서 확인할 수 있는 콜백 알리미 시스템입니다.",
+        f"{SITE} 티링크 콜백",
+        anchors=["티링크 콜백", "콜백 알리미"],
+    ),
+    fact(
+        "PAIN-MISSED",
+        "pain",
+        "상담원이 모두 통화 중이거나 자리를 비운 사이 걸려 온 전화는 그대로 끊깁니다.",
+        "공식 블로그 2026-10-06 콜백 글",
+    ),
+    fact(
+        "PAIN-WHO",
+        "pain",
+        "전화가 걸려 왔을 때 이 고객이 누구였는지, 지난번에 무슨 상담을 했는지 찾느라 응대가 늦어집니다.",
+        "공식 블로그 2026-10-06 고객관리 글",
+    ),
+    fact(
+        "FEAT-POPUP",
+        "feature",
+        "전화가 오는 순간 상담원 PC 화면에 고객 정보가 팝업으로 뜹니다.",
+        "공식 블로그 2026-10-06 고객관리 글",
+    ),
+    fact(
+        "FEAT-CLICKCALL",
+        "feature",
+        "고객 화면에서 버튼을 누르면 연결된 단말기에서 바로 전화가 발신됩니다.",
+        "공식 블로그 2026-10-06 고객관리 글",
+    ),
+    fact(
+        "FEAT-SMS",
+        "feature",
+        "고객관리 화면에서 SMS·LMS·MMS 문자를 보내고, 엑셀로 수신자를 올려 대량 발송할 수 있습니다.",
+        "CRM 매뉴얼",
+    ),
+    # telemarketing
+    fact(
+        "PAIN-TM",
+        "pain",
+        "일반전화(02, 031, 070 등)로 걸면 고객이 잘 받지 않습니다.",
+        f"{SITE} 티링크 모바일",
+    ),
+    fact(
+        "FEAT-010",
+        "feature",
+        "발신번호 변작 없이 010 번호를 그대로 사용해 발신합니다.",
+        f"{SITE} 티링크 모바일",
+    ),
+    fact("FEAT-CARD", "feature", "명함을 사진으로 찍어 등록하고 관리할 수 있습니다.", f"{SITE} 티링크 모바일"),
+    fact(
+        "FEAT-FACE",
+        "feature",
+        "모바일 앱에서 고객을 직접 만나 나눈 대화도 녹음(대면 녹취)할 수 있습니다.",
+        "공식 블로그 2026-10-06 모바일 CRM 글",
+    ),
+    # multilingual sites
+    fact(
+        "PROD-ON",
+        "product",
+        "티링크온은 LTE·Wi-Fi 네트워크 기반의 업무용 PTT 무전 솔루션입니다.",
+        f"{SITE} 티링크 온",
+        anchors=["티링크온", "티링크 온"],
+    ),
+    fact(
+        "FEAT-ON-RANGE",
+        "feature",
+        "티링크온은 인터넷망을 사용해 무전 주파수 반경의 제약 없이 통신합니다.",
+        f"{SITE} 티링크 온",
+    ),
+    fact(
+        "FEAT-ON-TRANSLATE",
+        "feature",
+        "티링크온의 AI 실시간 통역은 부가서비스이며 30개국 이상의 언어를 지원합니다.",
+        f"{SITE} 티링크 온",
+        values=[{"amount": 30, "unit": "개"}],
+        anchors=["개국"],
+    ),
+    fact(
+        "FEAT-ON-LOG",
+        "feature",
+        "무전 통화와 통역 세션이 서버에 자동으로 기록되고 요약됩니다.",
+        f"{SITE} 티링크 온",
+    ),
+    fact(
+        "FEAT-ON-SOS",
+        "feature",
+        "버튼을 3초간 누르면 회사 전체 사용자에게 긴급알림이 전파됩니다.",
+        f"{SITE} 티링크 온",
+    ),
+    fact(
+        "PAIN-ON",
+        "pain",
+        "외국인 근로자가 함께 일하는 현장에서는 작업 지시를 여러 언어로 전달해야 합니다.",
+        f"{SITE} 티링크 온",
     ),
     # pains (from the company's own pages)
     fact(
@@ -426,6 +589,42 @@ TARGETS = [
         "must_conditions": [],
         "status": "proposed",
     },
+    {
+        "id": "school",
+        "name": "학교",
+        "pains": ["PAIN-SCHOOL", "PAIN-SCHOOL-COMPLAINT"],
+        "bundle": ["PROD-SCHOOL"],
+        "quote_items": ["PRICE-SCHOOL"],
+        "must_conditions": [],
+        "status": "proposed",
+    },
+    {
+        "id": "small-office",
+        "name": "소호 사무실",
+        "pains": ["PAIN-MISSED", "PAIN-WHO"],
+        "bundle": ["PROD-CALLBACK", "PROD-CRM"],
+        "quote_items": ["PRICE-B", "PRICE-CALLBACK"],
+        "must_conditions": [],
+        "status": "proposed",
+    },
+    {
+        "id": "telemarketing",
+        "name": "전화 영업·보험대리점",
+        "pains": ["PAIN-TM", "PAIN-MOBILE"],
+        "bundle": ["PROD-MOBILE", "PROD-CRM"],
+        "quote_items": ["PRICE-B", "PRICE-MOBILE"],
+        "must_conditions": ["COND-ANDROID"],
+        "status": "proposed",
+    },
+    {
+        "id": "multilingual-site",
+        "name": "다국어 현장(건설·제조·물류)",
+        "pains": ["PAIN-ON"],
+        "bundle": ["PROD-ON"],
+        "quote_items": [],
+        "must_conditions": [],
+        "status": "proposed",
+    },
 ]
 
 E = [
@@ -493,7 +692,5 @@ if __name__ == "__main__":
     ids = [f["id"] for f in FACTS]
     assert len(ids) == len(set(ids)), "duplicate fact id"
     for name, payload in (("facts", FACTS), ("targets", TARGETS), ("guideline", GUIDELINE)):
-        (OUT / f"{name}.json").write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        (OUT / f"{name}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(len(FACTS), "facts,", len(TARGETS), "targets,", len(GUIDELINE["emphasis"]), "emphasis items")

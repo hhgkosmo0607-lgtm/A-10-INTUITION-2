@@ -469,6 +469,280 @@
     }
   },
   {
+    "id": "PROD-SCHOOL",
+    "kind": "product",
+    "statement": "학교용 녹취는 녹취서버 1대로 교내 인터넷전화 전체를 녹음하는 구매형 상품입니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "anchors": [
+      "학교용 녹취",
+      "티링크레코딩"
+    ],
+    "scope": "학교"
+  },
+  {
+    "id": "FEAT-SCHOOL-ID",
+    "kind": "feature",
+    "statement": "선생님마다 개인 계정이 주어져 본인 통화만 확인하고, 전체 확인은 관리자만 할 수 있습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "scope": "학교"
+  },
+  {
+    "id": "FEAT-SCHOOL-NET",
+    "kind": "feature",
+    "statement": "학교용 녹취서버는 학내망에서만 접속할 수 있습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "scope": "학교"
+  },
+  {
+    "id": "FEAT-SCHOOL-KEEP",
+    "kind": "feature",
+    "statement": "학교용 녹취는 통신사가 바뀌어도 기존 녹취파일을 보관합니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "scope": "학교"
+  },
+  {
+    "id": "FEAT-SCHOOL-LOG",
+    "kind": "feature",
+    "statement": "누가 언제 어떤 녹음을 들었는지 재생 기록이 남습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "scope": "학교"
+  },
+  {
+    "id": "PAIN-SCHOOL",
+    "kind": "pain",
+    "statement": "녹음되는 전화기가 민원실에만 있어 민원 전화를 받으면 자리를 옮겨야 합니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "PAIN-SCHOOL-COMPLAINT",
+    "kind": "pain",
+    "statement": "일부 학부모의 악성 민원이 교육 활동 침해를 넘어 선생님 개인에게까지 이어지고 있습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "PRICE-SCHOOL",
+    "kind": "price",
+    "statement": "학교용 녹취서버는 교내 전화기 전체 기준 1,500,000원이며 구축 시 1회만 청구하고 월 사용요금이 없습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "values": [
+      {
+        "amount": 1500000,
+        "unit": "원"
+      }
+    ],
+    "anchors": [
+      "학교용 녹취서버",
+      "구축 비용"
+    ],
+    "requires": [
+      "COND-SCHOOL-ENV"
+    ],
+    "pricing": {
+      "monthly": 0,
+      "per_agent": false,
+      "setup": 1500000,
+      "min_agents": 1
+    },
+    "scope": "학교"
+  },
+  {
+    "id": "COND-SCHOOL-ENV",
+    "kind": "condition",
+    "statement": "학교용 녹취의 실제 견적은 학교 환경에 따라 달라질 수 있습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
+      "checked": "2026-11-20"
+    },
+    "markers": [
+      "환경에 따라"
+    ]
+  },
+  {
+    "id": "PROD-CALLBACK",
+    "kind": "product",
+    "statement": "티링크 콜백은 부재중 통화를 모아서 확인할 수 있는 콜백 알리미 시스템입니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 콜백",
+      "checked": "2026-11-20"
+    },
+    "anchors": [
+      "티링크 콜백",
+      "콜백 알리미"
+    ]
+  },
+  {
+    "id": "PAIN-MISSED",
+    "kind": "pain",
+    "statement": "상담원이 모두 통화 중이거나 자리를 비운 사이 걸려 온 전화는 그대로 끊깁니다.",
+    "source": {
+      "where": "공식 블로그 2026-10-06 콜백 글",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "PAIN-WHO",
+    "kind": "pain",
+    "statement": "전화가 걸려 왔을 때 이 고객이 누구였는지, 지난번에 무슨 상담을 했는지 찾느라 응대가 늦어집니다.",
+    "source": {
+      "where": "공식 블로그 2026-10-06 고객관리 글",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-POPUP",
+    "kind": "feature",
+    "statement": "전화가 오는 순간 상담원 PC 화면에 고객 정보가 팝업으로 뜹니다.",
+    "source": {
+      "where": "공식 블로그 2026-10-06 고객관리 글",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-CLICKCALL",
+    "kind": "feature",
+    "statement": "고객 화면에서 버튼을 누르면 연결된 단말기에서 바로 전화가 발신됩니다.",
+    "source": {
+      "where": "공식 블로그 2026-10-06 고객관리 글",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-SMS",
+    "kind": "feature",
+    "statement": "고객관리 화면에서 SMS·LMS·MMS 문자를 보내고, 엑셀로 수신자를 올려 대량 발송할 수 있습니다.",
+    "source": {
+      "where": "CRM 매뉴얼",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "PAIN-TM",
+    "kind": "pain",
+    "statement": "일반전화(02, 031, 070 등)로 걸면 고객이 잘 받지 않습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-010",
+    "kind": "feature",
+    "statement": "발신번호 변작 없이 010 번호를 그대로 사용해 발신합니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-CARD",
+    "kind": "feature",
+    "statement": "명함을 사진으로 찍어 등록하고 관리할 수 있습니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-FACE",
+    "kind": "feature",
+    "statement": "모바일 앱에서 고객을 직접 만나 나눈 대화도 녹음(대면 녹취)할 수 있습니다.",
+    "source": {
+      "where": "공식 블로그 2026-10-06 모바일 CRM 글",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "PROD-ON",
+    "kind": "product",
+    "statement": "티링크온은 LTE·Wi-Fi 네트워크 기반의 업무용 PTT 무전 솔루션입니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 온",
+      "checked": "2026-11-20"
+    },
+    "anchors": [
+      "티링크온",
+      "티링크 온"
+    ]
+  },
+  {
+    "id": "FEAT-ON-RANGE",
+    "kind": "feature",
+    "statement": "티링크온은 인터넷망을 사용해 무전 주파수 반경의 제약 없이 통신합니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 온",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-ON-TRANSLATE",
+    "kind": "feature",
+    "statement": "티링크온의 AI 실시간 통역은 부가서비스이며 30개국 이상의 언어를 지원합니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 온",
+      "checked": "2026-11-20"
+    },
+    "values": [
+      {
+        "amount": 30,
+        "unit": "개"
+      }
+    ],
+    "anchors": [
+      "개국"
+    ]
+  },
+  {
+    "id": "FEAT-ON-LOG",
+    "kind": "feature",
+    "statement": "무전 통화와 통역 세션이 서버에 자동으로 기록되고 요약됩니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 온",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "FEAT-ON-SOS",
+    "kind": "feature",
+    "statement": "버튼을 3초간 누르면 회사 전체 사용자에게 긴급알림이 전파됩니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 온",
+      "checked": "2026-11-20"
+    }
+  },
+  {
+    "id": "PAIN-ON",
+    "kind": "pain",
+    "statement": "외국인 근로자가 함께 일하는 현장에서는 작업 지시를 여러 언어로 전달해야 합니다.",
+    "source": {
+      "where": "홈페이지 www.tlinkcrm.com 티링크 온",
+      "checked": "2026-11-20"
+    }
+  },
+  {
     "id": "PAIN-MOBILE",
     "kind": "pain",
     "statement": "휴대폰으로 통화하면 녹음이 직원 개인 폰에만 남고, 누가 어떤 고객과 무슨 이야기를 했는지 회사에서 알 수 없습니다.",

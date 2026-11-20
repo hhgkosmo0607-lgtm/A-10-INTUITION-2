@@ -1,6 +1,7 @@
 """Contracts the application layer depends on. Adapters implement them."""
 
-from typing import Protocol
+from collections.abc import Sequence
+from typing import Any, Protocol
 
 from factlock.domain.models import Draft, DraftRequest, Fact, Guideline, ReviewReport, Target
 
@@ -53,3 +54,31 @@ class DraftWriterError(Exception):
     def __init__(self, code: str) -> None:
         super().__init__(code)
         self.code = code
+
+
+class AiError(Exception):
+    """An AI engine could not answer. Carries a fixed code, never prompt or answer text."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+class JsonModel(Protocol):
+    """Returns one JSON object shaped by the schema. Raises AiError when unavailable."""
+
+    name: str
+
+    def ask(self, system: str, prompt: str, schema: dict[str, Any]) -> dict[str, Any]: ...
+
+
+class TargetPlanner(Protocol):
+    """Proposes fact ids for a free-text customer description. Raises AiError when unavailable."""
+
+    def plan(self, description: str, facts: Sequence[Fact]) -> dict[str, Any]: ...
+
+
+class MeaningReviewer(Protocol):
+    """Finds meaning-level problems rules cannot see. Raises AiError when unavailable."""
+
+    def review(self, title: str, body: str, facts: Sequence[Fact]) -> list[dict[str, str]]: ...

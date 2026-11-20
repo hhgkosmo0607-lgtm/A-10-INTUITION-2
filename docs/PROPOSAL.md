@@ -50,7 +50,7 @@ MVP 범위: 티링크 한 회사, 타깃 2개('외근 영업 조직', '재택 �
 
 ## [기술 스택]
 
-AI 모델: Claude (자료 읽기와 사실 목록 정리는 Claude Code, 초안 작성은 Claude API)
+AI 모델: Claude와 Codex (구독 CLI 또는 Claude API로 연결. 묶음 고르기, 초안 작성, 의미 검수에 사용)
 백엔드: Python 3.12, FastAPI, SQLite, 엑셀 읽기(openpyxl)
 검수 엔진: 순수 Python 규칙(사실 잠금 검사, 키워드·조건 검사, 견적 계산), pytest로 정답 사례 검증
 화면: HTML·JavaScript

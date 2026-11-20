@@ -89,7 +89,8 @@
       "type": "sentence",
       "text": "티링크 콜백은 모든 상담원이 통화 중일 때 고객을 대기시키고 통화 대기 목록을 보여 줍니다.",
       "fact_ids": [
-        "FEAT-CALLBACK"
+        "FEAT-CALLBACK",
+        "PROD-CALLBACK"
       ]
     },
     {

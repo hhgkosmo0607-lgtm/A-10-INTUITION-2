@@ -41,5 +41,72 @@
     ],
     "must_conditions": [],
     "status": "proposed"
+  },
+  {
+    "id": "school",
+    "name": "학교",
+    "pains": [
+      "PAIN-SCHOOL",
+      "PAIN-SCHOOL-COMPLAINT"
+    ],
+    "bundle": [
+      "PROD-SCHOOL"
+    ],
+    "quote_items": [
+      "PRICE-SCHOOL"
+    ],
+    "must_conditions": [],
+    "status": "proposed"
+  },
+  {
+    "id": "small-office",
+    "name": "소호 사무실",
+    "pains": [
+      "PAIN-MISSED",
+      "PAIN-WHO"
+    ],
+    "bundle": [
+      "PROD-CALLBACK",
+      "PROD-CRM"
+    ],
+    "quote_items": [
+      "PRICE-B",
+      "PRICE-CALLBACK"
+    ],
+    "must_conditions": [],
+    "status": "proposed"
+  },
+  {
+    "id": "telemarketing",
+    "name": "전화 영업·보험대리점",
+    "pains": [
+      "PAIN-TM",
+      "PAIN-MOBILE"
+    ],
+    "bundle": [
+      "PROD-MOBILE",
+      "PROD-CRM"
+    ],
+    "quote_items": [
+      "PRICE-B",
+      "PRICE-MOBILE"
+    ],
+    "must_conditions": [
+      "COND-ANDROID"
+    ],
+    "status": "proposed"
+  },
+  {
+    "id": "multilingual-site",
+    "name": "다국어 현장(건설·제조·물류)",
+    "pains": [
+      "PAIN-ON"
+    ],
+    "bundle": [
+      "PROD-ON"
+    ],
+    "quote_items": [],
+    "must_conditions": [],
+    "status": "proposed"
   }
 ]

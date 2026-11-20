@@ -97,9 +97,7 @@ def test_stores_json_text_and_utc_creation_time(tmp_path: Path) -> None:
     after = datetime.now(UTC)
 
     with closing(sqlite3.connect(path)) as connection:
-        row = connection.execute(
-            "SELECT draft, report, created_at FROM drafts WHERE id = ?", (draft_id,)
-        ).fetchone()
+        row = connection.execute("SELECT draft, report, created_at FROM drafts WHERE id = ?", (draft_id,)).fetchone()
 
     assert row is not None
     assert json.loads(row[0]) == {"title": "Synthetic title", "blocks": [], "source": "stored"}

@@ -38,11 +38,7 @@ def verdicts(report) -> dict[str, Verdict]:
 def test_c1_text_within_facts_passes(company: JsonCompanyData) -> None:
     report = run(company, GOOD)
     got = verdicts(report)
-    failed = {
-        rule: [f.message for f in report.result(rule).findings]
-        for rule, v in got.items()
-        if v is Verdict.FAIL
-    }
+    failed = {rule: [f.message for f in report.result(rule).findings] for rule, v in got.items() if v is Verdict.FAIL}
     assert failed == {}
     assert got["R2"] is Verdict.CHECK  # emphasis terms are not confirmed by a person yet
     assert got["R10"] is Verdict.PASS
@@ -57,10 +53,7 @@ def test_c2_wrong_setup_fee_is_a_mismatch(company: JsonCompanyData) -> None:
 
 
 def test_c3_leftover_memos_are_counted(company: JsonCompanyData) -> None:
-    body = (
-        GOOD
-        + "\n[이미지 삽입: 고객 조회 화면]\n[이미지 삽입: 문자 발송 화면]\n[이미지 삽입: 상담 관리 화면]\n"
-    )
+    body = GOOD + "\n[이미지 삽입: 고객 조회 화면]\n[이미지 삽입: 문자 발송 화면]\n[이미지 삽입: 상담 관리 화면]\n"
     result = run(company, body).result("R8")
     assert result.verdict is Verdict.FAIL
     assert len(result.findings) == 3

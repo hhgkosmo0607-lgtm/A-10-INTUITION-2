@@ -18,7 +18,18 @@ from factlock.domain.models import (
 
 SUPERLATIVES = ("최고", "최초", "유일", "업계 최저", "100%", "완벽", "무조건", "1위", "독보적", "압도적")
 HEDGES = ("회사 설명", "티링크에 따르면", "티링크 측", "회사 측 설명", "회사에 따르면")
-DISCLOSURES = ("협찬", "제공받아", "제공 받아", "원고료", "유료 광고", "#광고", "광고입니다", "체험단")
+DISCLOSURES = (
+    "협찬",
+    "제공받아",
+    "제공 받아",
+    "제공한 자료",
+    "제공된 자료",
+    "원고료",
+    "유료 광고",
+    "#광고",
+    "광고입니다",
+    "체험단",
+)
 _LEFTOVER = re.compile(
     r"\[[^\]\n]*(?:삽입|이미지|체험 내용|작성|입력|TODO)[^\]\n]*\]|TODO|\{\{[^}]*\}\}|○○|XXX", re.IGNORECASE
 )
@@ -55,18 +66,14 @@ def _keywords(title: str, body: str, guideline: Guideline) -> RuleResult:
 
 def _emphasis(text: str, guideline: Guideline, target: Target | None = None) -> RuleResult:
     if target is not None and guideline.targets and target.id not in guideline.targets:
-        note = Finding(
-            f"이 가이드라인은 다른 타깃용이라 '{target.name}' 글에는 강조 항목 검사를 하지 않았습니다."
-        )
+        note = Finding(f"이 가이드라인은 다른 타깃용이라 '{target.name}' 글에는 강조 항목 검사를 하지 않았습니다.")
         return RuleResult("R2", "강조 항목", Verdict.CHECK, (note,))
     findings = []
     unconfirmed = False
     for item in guideline.emphasis:
         if not item.any_of:
             unconfirmed = True
-            findings.append(
-                Finding(f"강조 {item.no}번을 알아볼 낱말이 정해지지 않았습니다. 낱말 확인이 필요합니다.")
-            )
+            findings.append(Finding(f"강조 {item.no}번을 알아볼 낱말이 정해지지 않았습니다. 낱말 확인이 필요합니다."))
             continue
         missing = [group for group in item.any_of if not any(contains(text, term) for term in group)]
         if missing:
@@ -87,9 +94,7 @@ def _emphasis(text: str, guideline: Guideline, target: Target | None = None) -> 
 
 def _footer(text: str, guideline: Guideline) -> RuleResult:
     plain = text.replace("https://", "").replace("http://", "").replace("www.", "")
-    findings = [
-        Finding(f"하단 정보가 없습니다: {item}") for item in guideline.footer if not contains(plain, item)
-    ]
+    findings = [Finding(f"하단 정보가 없습니다: {item}") for item in guideline.footer if not contains(plain, item)]
     return _result("R3", "하단 정보", findings)
 
 

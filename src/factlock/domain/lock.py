@@ -57,9 +57,7 @@ def lock_draft(draft: Draft, facts: Sequence[Fact]) -> tuple[Draft, tuple[Droppe
 
 
 def footer_text(guideline: Guideline, facts: Sequence[Fact]) -> str:
-    lines = [
-        fact.statement for fact in facts if fact.kind == "contact" and fact.status is FactStatus.CONFIRMED
-    ]
+    lines = [fact.statement for fact in facts if fact.kind == "contact" and fact.status is FactStatus.CONFIRMED]
     return "\n".join(lines)
 
 

@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from factlock.application.service import FactLockService, UnknownTarget
+from factlock.application.service import FactLockService, Unavailable, UnknownTarget
 from factlock.domain.models import Fact, ReviewReport
 from factlock.ports import GuidelineError, GuidelineReader
 
@@ -22,17 +22,25 @@ GUIDELINE_MESSAGES = {
     "guideline_missing_required": "'필수' 키워드 줄을 찾지 못했습니다.",
     "guideline_missing_emphasis": "'강조내용' 줄이나 번호가 붙은 항목을 찾지 못했습니다.",
 }
-FALLBACK_MESSAGES = {
-    "live_writer_not_configured": "API 키가 없어 AI를 부르지 못했습니다.",
+AI_MESSAGES = {
+    "live_writer_not_configured": "연결된 AI가 없습니다.",
+    "ai_not_configured": "연결된 AI가 없습니다.",
     "stored_requested": "AI를 부르지 않도록 선택했습니다.",
+    "stored_draft_missing": "이 타깃은 저장된 초안이 없습니다. AI가 연결되어야 초안을 만들 수 있습니다.",
+    "no_matching_products": "회사 자료에서 이 고객에게 맞는 제품을 찾지 못했습니다.",
+    "claude_cli_signed_out": "Claude Code 로그인이 만료되었습니다. 터미널에서 claude를 실행해 다시 로그인해 주세요.",
+    "claude_cli_timeout": "AI 응답이 너무 오래 걸렸습니다.",
+    "codex_cli_timeout": "AI 응답이 너무 오래 걸렸습니다.",
     "claude_auth_failed": "API 키 인증에 실패했습니다.",
-    "claude_rate_limited": "요청 한도에 걸렸습니다.",
-    "claude_api_error": "AI 서버 오류가 났습니다.",
+    "claude_rate_limited": "AI 요청 한도에 걸렸습니다.",
     "claude_unreachable": "AI 서버에 연결하지 못했습니다.",
     "claude_refused": "AI가 요청을 거절했습니다.",
-    "claude_truncated": "AI 답이 중간에 끊겼습니다.",
-    "claude_bad_output": "AI 답의 형식이 맞지 않았습니다.",
 }
+AI_DEFAULT = "AI가 답하지 못했습니다. 잠시 뒤 다시 시도해 주세요."
+
+
+def ai_message(code: str) -> str:
+    return AI_MESSAGES.get(code, AI_DEFAULT) if code else ""
 
 
 class BundleIn(BaseModel):
@@ -49,6 +57,11 @@ class ReviewIn(BaseModel):
     title: str = Field(max_length=300)
     body: str = Field(max_length=60_000)
     target_id: str | None = None
+    ai: bool = False
+
+
+class PlanIn(BaseModel):
+    description: str = Field(min_length=2, max_length=200)
 
 
 def _fact(fact: Fact) -> dict[str, Any]:
@@ -74,7 +87,7 @@ def _bad_target() -> HTTPException:
     return HTTPException(404, {"code": "unknown_target", "message": "없는 타깃입니다."})
 
 
-def create_app(service: FactLockService, reader: GuidelineReader) -> FastAPI:
+def create_app(service: FactLockService, reader: GuidelineReader, engine_name: str = "") -> FastAPI:
     app = FastAPI(title="FactLock", docs_url=None, redoc_url=None)
 
     def guideline_view() -> dict[str, Any]:
@@ -99,6 +112,7 @@ def create_app(service: FactLockService, reader: GuidelineReader) -> FastAPI:
         facts = service.facts
         return {
             "live": service.live_available,
+            "engine": engine_name,
             "targets": [{"id": t.id, "name": t.name, "status": t.status} for t in service.targets],
             "guideline": guideline_view(),
             "fact_counts": {
@@ -123,7 +137,16 @@ def create_app(service: FactLockService, reader: GuidelineReader) -> FastAPI:
             "pains": [_fact(f) for f in result.pains],
             "conditions": [_fact(f) for f in result.conditions],
             "quote": asdict(result.quote),
+            "reason": result.reason,
         }
+
+    @app.post("/api/targets/plan")
+    def plan(body: PlanIn) -> dict[str, Any]:
+        try:
+            target = service.plan_target(body.description)
+        except Unavailable as error:
+            raise HTTPException(503, {"code": error.code, "message": ai_message(error.code)}) from None
+        return {"id": target.id, "name": target.name, "status": target.status}
 
     @app.post("/api/guideline")
     async def guideline(file: UploadFile = File(...)) -> dict[str, Any]:  # noqa: B008
@@ -143,13 +166,15 @@ def create_app(service: FactLockService, reader: GuidelineReader) -> FastAPI:
             result = service.make_draft(body.target_id, body.live)
         except UnknownTarget:
             raise _bad_target() from None
+        except Unavailable as error:
+            raise HTTPException(503, {"code": error.code, "message": ai_message(error.code)}) from None
         used = {fact_id for block in result.draft.blocks for fact_id in block.fact_ids}
         by_id = {fact.id: fact for fact in service.facts}
         return {
             "draft_id": result.draft_id,
             "source": result.draft.source,
             "fallback_code": result.fallback_code,
-            "fallback_message": FALLBACK_MESSAGES.get(result.fallback_code, ""),
+            "fallback_message": ai_message(result.fallback_code),
             "title": result.draft.title,
             "blocks": [asdict(block) for block in result.draft.blocks],
             "body": result.body,
@@ -161,7 +186,7 @@ def create_app(service: FactLockService, reader: GuidelineReader) -> FastAPI:
     @app.post("/api/review")
     def review(body: ReviewIn) -> dict[str, Any]:
         try:
-            return _report(service.review_text(body.title, body.body, body.target_id))
+            return _report(service.review_text(body.title, body.body, body.target_id, body.ai))
         except UnknownTarget:
             raise _bad_target() from None
 

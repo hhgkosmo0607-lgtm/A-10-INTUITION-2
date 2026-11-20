@@ -79,6 +79,4 @@ class XlsxGuidelineReader(GuidelineReader):
 
         first = next((item.text for item in items if item.no == 1), "")
         titles = tuple(match.group(1) or match.group(2) for match in _QUOTE.finditer(first))
-        return Guideline(
-            required_keywords=required, emphasis=tuple(items), footer=_footer(text), title_keywords=titles
-        )
+        return Guideline(required_keywords=required, emphasis=tuple(items), footer=_footer(text), title_keywords=titles)

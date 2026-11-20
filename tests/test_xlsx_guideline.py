@@ -70,8 +70,7 @@ def test_accepts_item_numbers_above_nine_and_contacts_anywhere_in_cell() -> None
             ("필수", "alpha"),
             (
                 "강조내용",
-                "1. First https://www.example.test/path?ignored=yes#fragment\n"
-                "12. Second 000-000-0000\n100. Last item.",
+                "1. First https://www.example.test/path?ignored=yes#fragment\n12. Second 000-000-0000\n100. Last item.",
             ),
         ]
     )

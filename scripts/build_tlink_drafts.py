@@ -74,9 +74,7 @@ FIELD_SALES = {
             "AI 통화요약과 함께 고객 요청사항과 후속 조치 내용도 자동으로 기록된다고 가이드라인은 설명합니다.",
             "FEAT-FOLLOWUP",
         ),
-        slot(
-            "직접 통화 한 건을 녹음하고, 녹취 결과와 AI 요약이 생성되는 과정을 화면 이미지와 함께 적어 주세요"
-        ),
+        slot("직접 통화 한 건을 녹음하고, 녹취 결과와 AI 요약이 생성되는 과정을 화면 이미지와 함께 적어 주세요"),
         h("영업사원 관리"),
         s("통화 통계는 총 통화, 수신·발신, 평균 통화시간, 담당자별 통화량을 보여 줍니다.", "FEAT-STATS"),
         s("고객 화면에 그 고객의 상담 이력과 통화·문자·주문 이력이 쌓입니다.", "FEAT-HISTORY"),
@@ -126,9 +124,7 @@ REMOTE = {
     "title": "재택 콜센터를 위한 콜센터 프로그램: 티링크 PC폰과 통화요약으로 업무자동화",
     "blocks": [
         s("이 글은 티링크가 제공한 자료를 바탕으로 작성한 협찬 소개 글입니다."),
-        s(
-            "안녕하세요. 오늘은 재택근무 상담 조직을 위한 콜센터 프로그램 구성과 업무자동화 방법을 소개합니다."
-        ),
+        s("안녕하세요. 오늘은 재택근무 상담 조직을 위한 콜센터 프로그램 구성과 업무자동화 방법을 소개합니다."),
         h("재택 상담의 고민"),
         s("재택근무에서는 개인 휴대폰으로 전화를 받게 되고 고객에게 개인 번호가 남습니다.", "PAIN-REMOTE"),
         s("재택근무자가 늘면 직원마다 전화기를 새로 놓아야 하는지가 고민입니다.", "PAIN-PHONE-SET"),
@@ -157,6 +153,7 @@ REMOTE = {
         s(
             "티링크 콜백은 모든 상담원이 통화 중일 때 고객을 대기시키고 통화 대기 목록을 보여 줍니다.",
             "FEAT-CALLBACK",
+            "PROD-CALLBACK",
         ),
         slot("재택 환경에서 PC폰으로 전화를 받고 녹취와 요약을 확인한 과정을 화면 이미지와 함께 적어 주세요"),
         h("보안"),
@@ -175,7 +172,5 @@ REMOTE = {
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
     for name, draft in (("field-sales", FIELD_SALES), ("remote-callcenter", REMOTE)):
-        (OUT / f"{name}.json").write_text(
-            json.dumps(draft, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        (OUT / f"{name}.json").write_text(json.dumps(draft, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print("drafts written")
