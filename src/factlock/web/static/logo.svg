@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="애드체크 로고">
+  <rect width="64" height="64" rx="15" fill="#2a3a80"/>
+  <path fill="#fff" fill-rule="evenodd" d="M7 47 L18 17 H26 L37 47 H30 L28 41 H16 L14 47 Z M18 35 H26 L22 23 Z"/>
+  <path fill="#fff" fill-rule="evenodd" d="M39 17 H46 C55 17 58 25 58 32 C58 39 55 47 46 47 H39 Z M45 23 V41 H46 C50 41 52 37 52 32 C52 27 50 23 46 23 Z"/>
+  <path d="M15 37 L27 50 L52 14" fill="none" stroke="#2a3a80" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M15 37 L27 50 L52 14" fill="none" stroke="#6bdc9a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

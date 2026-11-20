@@ -7,7 +7,6 @@ from typing import Any
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
 
 from factlock.application.service import (
     DocumentView,
@@ -32,56 +31,18 @@ from factlock.web.messages import (
     GUIDELINE_MESSAGES,
     ai_message,
 )
+from factlock.web.schemas import (
+    BundleIn,
+    CarouselReviewIn,
+    DraftIn,
+    PlanIn,
+    ReviewIn,
+    UserFactIn,
+    choices_from,
+)
 
 STATIC = Path(__file__).parent / "static"
 MAX_UPLOAD = 2 * 1024 * 1024
-
-
-class BundleIn(BaseModel):
-    target_id: str
-    agents: int = Field(ge=1, le=10_000)
-
-
-class DraftIn(BaseModel):
-    target_id: str
-    live: bool = True
-    include_price: bool = False
-    must_include: list[str] = Field(default_factory=list, max_length=10)
-    pains: list[str] | None = Field(default=None, max_length=10)
-    conditions: list[str] | None = Field(default=None, max_length=20)
-
-
-class SlideIn(BaseModel):
-    kicker: str = Field(max_length=40)
-    headline: str = Field(max_length=120)
-    body: str = Field(max_length=400)
-
-
-class CarouselReviewIn(BaseModel):
-    target_id: str | None = None
-    slides: list[SlideIn] = Field(max_length=10)
-    caption: str = Field(max_length=5000)
-    hashtags: list[str] = Field(max_length=40)
-    must_include: list[str] = Field(default_factory=list, max_length=10)
-    conditions: list[str] | None = Field(default=None, max_length=20)
-
-
-class ReviewIn(BaseModel):
-    title: str = Field(max_length=300)
-    body: str = Field(max_length=60_000)
-    target_id: str | None = None
-    ai: bool = False
-    must_include: list[str] = Field(default_factory=list, max_length=10)
-    conditions: list[str] | None = Field(default=None, max_length=20)
-
-
-class UserFactIn(BaseModel):
-    statement: str = Field(min_length=4, max_length=200)
-    kind: str = Field(default="feature", pattern="^(pain|condition|feature)$")
-
-
-class PlanIn(BaseModel):
-    description: str = Field(min_length=2, max_length=200)
 
 
 def _fact(fact: Fact) -> dict[str, Any]:
@@ -319,9 +280,7 @@ def create_app(
     @app.post("/api/drafts")
     def drafts(body: DraftIn) -> dict[str, Any]:
         try:
-            result = service.make_draft(
-                body.target_id, body.live, body.include_price, body.must_include, body.pains, body.conditions
-            )
+            result = service.make_draft(body.target_id, choices_from(body))
         except UnknownTarget:
             raise _bad_target() from None
         except Unavailable as error:
@@ -344,9 +303,7 @@ def create_app(
     @app.post("/api/carousel")
     def carousel(body: DraftIn) -> dict[str, Any]:
         try:
-            result = service.make_carousel(
-                body.target_id, body.live, body.include_price, body.must_include, body.pains, body.conditions
-            )
+            result = service.make_carousel(body.target_id, choices_from(body))
         except UnknownTarget:
             raise _bad_target() from None
         except Unavailable as error:
@@ -373,17 +330,14 @@ def create_app(
             tuple(body.hashtags),
         )
         try:
-            target = service.tailored_target(body.target_id, body.conditions) if body.target_id else None
+            return _report(service.review_carousel(edited, body.target_id, choices_from(body)))
         except UnknownTarget:
             raise _bad_target() from None
-        return _report(service.review_carousel(edited, target, body.must_include))
 
     @app.post("/api/review")
     def review(body: ReviewIn) -> dict[str, Any]:
         try:
-            return _report(
-                service.review_text(body.title, body.body, body.target_id, body.ai, body.must_include, body.conditions)
-            )
+            return _report(service.review_text(body.title, body.body, body.target_id, body.ai, choices_from(body)))
         except UnknownTarget:
             raise _bad_target() from None
 

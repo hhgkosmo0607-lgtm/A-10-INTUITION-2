@@ -6,6 +6,18 @@ from factlock.domain.models import Carousel, Draft, Dropped, Fact, Quote, Review
 
 
 @dataclass(frozen=True)
+class Choices:
+    """What the marketer decided in the content step. None means 'use the target's defaults'."""
+
+    live: bool = True
+    include_price: bool = False
+    must_include: tuple[str, ...] = ()
+    emphasize: tuple[str, ...] = ()
+    pains: tuple[str, ...] | None = None
+    conditions: tuple[str, ...] | None = None
+
+
+@dataclass(frozen=True)
 class Bundle:
     target: Target
     products: tuple[Fact, ...]

@@ -10,6 +10,7 @@ from factlock.application.guidelines import GuidelineBook
 from factlock.application.results import (
     Bundle,
     CarouselResult,
+    Choices,
     DocumentView,
     DraftResult,
     Ingested,
@@ -37,6 +38,7 @@ from factlock.ports import (
 __all__ = [
     "Bundle",
     "CarouselResult",
+    "Choices",
     "DocumentView",
     "DraftResult",
     "FactLockService",
@@ -134,47 +136,19 @@ class FactLockService:
     def live_available(self) -> bool:
         return self._blog.live_available
 
-    def make_draft(
-        self,
-        target_id: str,
-        live: bool = True,
-        include_price: bool = True,
-        must_include: Sequence[str] = (),
-        pains: Sequence[str] | None = None,
-        conditions: Sequence[str] | None = None,
-    ) -> DraftResult:
-        target = self._targets.tailored(target_id, pains, conditions)
-        return self._blog.make(target, live, include_price, must_include)
+    def make_draft(self, target_id: str, choices: Choices) -> DraftResult:
+        target = self._targets.tailored(target_id, choices.pains, choices.conditions)
+        return self._blog.make(target, choices)
 
-    def make_carousel(
-        self,
-        target_id: str,
-        live: bool = True,
-        include_price: bool = True,
-        must_include: Sequence[str] = (),
-        pains: Sequence[str] | None = None,
-        conditions: Sequence[str] | None = None,
-    ) -> CarouselResult:
-        target = self._targets.tailored(target_id, pains, conditions)
-        return self._carousel.make(target, live, include_price, must_include)
+    def make_carousel(self, target_id: str, choices: Choices) -> CarouselResult:
+        target = self._targets.tailored(target_id, choices.pains, choices.conditions)
+        return self._carousel.make(target, choices)
 
     # review
-    def review_text(
-        self,
-        title: str,
-        body: str,
-        target_id: str | None,
-        ai: bool = False,
-        must_include: Sequence[str] = (),
-        conditions: Sequence[str] | None = None,
-    ) -> ReviewReport:
-        target = self._targets.tailored(target_id, None, conditions) if target_id else None
-        return self._reviewing.text(title, body, target, ai, must_include)
+    def review_text(self, title: str, body: str, target_id: str | None, ai: bool, choices: Choices) -> ReviewReport:
+        target = self._targets.tailored(target_id, None, choices.conditions) if target_id else None
+        return self._reviewing.text(title, body, target, ai, choices.must_include, choices.emphasize)
 
-    def tailored_target(self, target_id: str, conditions: Sequence[str] | None) -> Target:
-        return self._targets.tailored(target_id, None, conditions)
-
-    def review_carousel(
-        self, carousel: Carousel, target: Target | None, must_include: Sequence[str] = ()
-    ) -> ReviewReport:
-        return self._reviewing.carousel(carousel, target, must_include)
+    def review_carousel(self, carousel: Carousel, target_id: str | None, choices: Choices) -> ReviewReport:
+        target = self._targets.tailored(target_id, None, choices.conditions) if target_id else None
+        return self._reviewing.carousel(carousel, target, choices.must_include, choices.emphasize)

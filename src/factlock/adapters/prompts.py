@@ -36,6 +36,8 @@ How to write
 - Aim for a complete post a marketer could publish after filling the experience slot: roughly 25 to 40
   sentence blocks.
 - Tone: polite 해요체/합니다체, plain words, no exclamation marks, no superlatives.
+- The marketer marked the facts in emphasize_fact_ids as what this piece is about. Build the title and the
+  opening around them, give them the most space, and let the other facts support them.
 - The marketer picked the facts in must_include_fact_ids. Work each of them into the copy, close to its
   original wording, with its id attached.
 - If the target has no price_fact_ids, the marketer chose to leave prices out: do not mention any price,
@@ -98,6 +100,7 @@ def build_prompt(request: DraftRequest) -> str:
             "price_fact_ids": list(request.target.quote_items),
             "must_condition_ids": list(request.target.must_conditions),
             "must_include_fact_ids": list(request.must_include),
+            "emphasize_fact_ids": list(request.emphasize),
         },
         "guideline": {
             "required_keywords": list(request.guideline.required_keywords),
@@ -281,6 +284,8 @@ caption must include each required condition with that condition's id.
 Product facts list "trigger_words": any card or sentence containing one must carry that product's id.
 Copy numbers and prices exactly as the fact states them.
 
+The marketer marked the facts in emphasize_fact_ids as what this post is about: make the first cards about
+them and give them the most room.
 The marketer picked the facts in must_include_fact_ids: work each of them into a card or the caption,
 close to its original wording, with its id attached.
 
@@ -347,6 +352,7 @@ def carousel_prompt(request: DraftRequest) -> str:
             "price_fact_ids": list(request.target.quote_items),
             "must_condition_ids": list(request.target.must_conditions),
             "must_include_fact_ids": list(request.must_include),
+            "emphasize_fact_ids": list(request.emphasize),
         },
         "facts": facts,
     }

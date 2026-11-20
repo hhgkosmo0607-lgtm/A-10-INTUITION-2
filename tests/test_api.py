@@ -240,6 +240,14 @@ def test_marketer_chooses_problems_and_notices_and_can_reuse_typed_ones(tmp_path
     assert writer.seen.target.pains == (pain["id"],)  # only the checked problem is sent
     assert writer.seen.target.must_conditions == ()  # the unchecked default notice is left out
     assert writer.seen.must_include == (note["id"],)
+    shown = {fact.id for fact in writer.seen.facts}
+    assert pain["id"] in shown and note["id"] in shown
+    assert "PAIN-MOBILE" not in shown  # an unchecked customer problem is not even shown to the writer
+
+    c.post("/api/drafts", json={"target_id": "field-sales"})
+    shown = {fact.id for fact in writer.seen.facts}
+    assert pain["id"] not in shown and note["id"] not in shown  # typed earlier but not ticked this time
+    assert "PAIN-MOBILE" in shown and "PAIN-SCHOOL" not in shown  # only this target's problems
 
 
 def test_unchecked_notice_is_still_caught_when_its_product_is_mentioned(tmp_path: Path) -> None:
@@ -251,3 +259,20 @@ def test_unchecked_notice_is_still_caught_when_its_product_is_mentioned(tmp_path
     )
     r7 = next(r for r in data["results"] if r["rule"] == "R7")
     assert r7["verdict"] == "fail" and "COND-ANDROID" in r7["findings"][0]["fact_ids"]
+
+
+def test_emphasized_items_reach_the_writer_and_a_miss_is_only_a_note(tmp_path: Path) -> None:
+    writer = SeeingWriter()
+    c = make_client(tmp_path, writer)
+    body = {"target_id": "field-sales", "emphasize": ["PROD-REPORT", "PAIN-MOBILE"]}
+    data = c.post("/api/drafts", json=body).json()
+    assert writer.seen is not None and writer.seen.emphasize == ("PROD-REPORT", "PAIN-MOBILE")
+    e1 = next(r for r in data["report"]["results"] if r["rule"] == "E1")
+    assert e1["verdict"] == "check"  # the fake draft ignores them: shown to the marketer, not a failure
+    assert data["report"]["passed"] is True or all(
+        r["rule"] != "E1" for r in data["report"]["results"] if r["verdict"] == "fail"
+    )
+
+    said = {"title": "t", "body": "종합리포트를 소개합니다.", "emphasize": ["PROD-REPORT"]}
+    ok = c.post("/api/review", json=said).json()
+    assert next(r for r in ok["results"] if r["rule"] == "E1")["verdict"] == "pass"

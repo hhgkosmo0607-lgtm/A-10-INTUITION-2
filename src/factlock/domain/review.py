@@ -215,6 +215,19 @@ def mentions(text: str, fact: Fact) -> bool:
     return hits / len(words) >= 0.5
 
 
+def emphasis_result(text: str, emphasized: Sequence[Fact]) -> RuleResult:
+    """Emphasised items may be reworded by the writer, so a miss is something to look at, not a failure."""
+    missing = []
+    for fact in emphasized:
+        named = fact.kind == "product" and fact.anchors
+        found = contains(text, fact.anchors[0]) if named else mentions(text, fact)
+        if not found:
+            missing.append(
+                Finding(f"강조하기로 한 내용이 글에서 잘 보이지 않습니다: {fact.statement}", fact_ids=(fact.id,))
+            )
+    return RuleResult("E1", "강조 내용", Verdict.CHECK if missing else Verdict.PASS, tuple(missing))
+
+
 def must_include_result(text: str, must: Sequence[Fact]) -> RuleResult:
     missing = [Finding(f"꼭 넣기로 한 내용이 글에 보이지 않습니다: {f.statement}", fact_ids=(f.id,)) for f in must]
     missing = [m for m, f in zip(missing, must, strict=True) if not mentions(text, f)]

@@ -152,6 +152,7 @@ class DraftRequest:
     facts: tuple[Fact, ...]
     include_price: bool = True
     must_include: tuple[str, ...] = ()  # fact ids the marketer wants in the copy
+    emphasize: tuple[str, ...] = ()  # fact ids the marketer wants the copy to lead with
 
 
 @dataclass(frozen=True)

@@ -7,7 +7,7 @@ from factlock.application.guidelines import GuidelineBook
 from factlock.domain.extract import contains
 from factlock.domain.lock import BODY_MAX, HEADLINE_MAX, carousel_text
 from factlock.domain.models import Carousel, Finding, Guideline, ReviewReport, RuleResult, Target, Verdict
-from factlock.domain.review import must_include_result, review
+from factlock.domain.review import emphasis_result, must_include_result, review
 from factlock.ports import AiError, MeaningReviewer
 
 MIN_SLIDES = 3
@@ -24,22 +24,43 @@ class Reviewing:
         self._meaning = meaning
 
     def text(
-        self, title: str, body: str, target: Target | None, ai: bool = False, must_include: Sequence[str] = ()
+        self,
+        title: str,
+        body: str,
+        target: Target | None,
+        ai: bool = False,
+        must_include: Sequence[str] = (),
+        emphasize: Sequence[str] = (),
     ) -> ReviewReport:
+        words = f"{title}\n{body}"
         results = list(review(title, body, self._catalog.all(), self._guidelines.current, target).results)
-        if must_include:
-            results.append(must_include_result(f"{title}\n{body}", self._catalog.must_include(must_include)))
+        results.extend(self._chosen(words, must_include, emphasize))
         if ai:
             results.append(self._ask_ai(title, body))
         return ReviewReport(tuple(results))
 
-    def carousel(self, carousel: Carousel, target: Target | None, must_include: Sequence[str] = ()) -> ReviewReport:
+    def carousel(
+        self,
+        carousel: Carousel,
+        target: Target | None,
+        must_include: Sequence[str] = (),
+        emphasize: Sequence[str] = (),
+    ) -> ReviewReport:
         """Card count and length, then the number, condition, leftover and wording rules on all the words."""
         words = carousel_text(carousel)
         base = review("", words, self._catalog.all(), Guideline((), (), ()), target)
         kept = tuple(result for result in base.results if result.rule in CAROUSEL_RULES)
-        extra = (must_include_result(words, self._catalog.must_include(must_include)),) if must_include else ()
-        return ReviewReport((self._card_count(carousel), self._card_length(carousel), *kept, *extra))
+        chosen = self._chosen(words, must_include, emphasize)
+        return ReviewReport((self._card_count(carousel), self._card_length(carousel), *kept, *chosen))
+
+    def _chosen(self, words: str, must_include: Sequence[str], emphasize: Sequence[str]) -> list[RuleResult]:
+        """Checks for what the marketer picked: content that must appear, and content to lead with."""
+        results = []
+        if must_include:
+            results.append(must_include_result(words, self._catalog.must_include(must_include)))
+        if emphasize:
+            results.append(emphasis_result(words, self._catalog.must_include(emphasize)))
+        return results
 
     @staticmethod
     def _card_count(carousel: Carousel) -> RuleResult:

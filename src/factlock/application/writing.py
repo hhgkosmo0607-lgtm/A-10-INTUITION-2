@@ -1,11 +1,11 @@
 """Produce the two outputs: a blog post and an Instagram carousel. Each goes through the fact lock."""
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 
 from factlock.application.briefing import WriterBrief
 from factlock.application.catalog import FactCatalog
 from factlock.application.guidelines import GuidelineBook
-from factlock.application.results import CarouselResult, DraftResult, Unavailable
+from factlock.application.results import CarouselResult, Choices, DraftResult, Unavailable
 from factlock.application.reviewing import Reviewing
 from factlock.domain.lock import lock_carousel, lock_draft, render_body
 from factlock.domain.models import Target
@@ -55,8 +55,10 @@ class BlogWriting:
     def live_available(self) -> bool:
         return self._live is not None
 
-    def make(self, target: Target, live: bool, include_price: bool, must_include: Sequence[str]) -> DraftResult:
-        request = self._brief.request(target, include_price, self._catalog.must_include(must_include))
+    def make(self, target: Target, choices: Choices) -> DraftResult:
+        live, include_price, must_include = choices.live, choices.include_price, choices.must_include
+        pick = self._catalog.must_include
+        request = self._brief.request(target, include_price, pick(must_include), pick(choices.emphasize))
         live_writer = self._live
         raw, fallback_code = write_with_fallback(
             live,
@@ -68,7 +70,7 @@ class BlogWriting:
         facts = self._catalog.all()
         draft, dropped = lock_draft(raw, facts)
         body = render_body(draft, self._guidelines.current, facts)
-        report = self._reviewing.text(draft.title, body, target, False, must_include)
+        report = self._reviewing.text(draft.title, body, target, False, must_include, choices.emphasize)
         draft_id = self._store.save(draft, report)
         return DraftResult(draft_id, draft, body, dropped, report, fallback_code)
 
@@ -88,8 +90,10 @@ class CarouselWriting:
         self._live = live
         self._stored = stored
 
-    def make(self, target: Target, live: bool, include_price: bool, must_include: Sequence[str]) -> CarouselResult:
-        request = self._brief.request(target, include_price, self._catalog.must_include(must_include))
+    def make(self, target: Target, choices: Choices) -> CarouselResult:
+        live, include_price, must_include = choices.live, choices.include_price, choices.must_include
+        pick = self._catalog.must_include
+        request = self._brief.request(target, include_price, pick(must_include), pick(choices.emphasize))
         live_writer, stored_writer = self._live, self._stored
         raw, fallback_code = write_with_fallback(
             live,
@@ -99,5 +103,5 @@ class CarouselWriting:
         if not include_price:
             raw = self._brief.carousel_without_prices(raw, target)
         carousel, dropped = lock_carousel(raw, self._catalog.all())
-        report = self._reviewing.carousel(carousel, target, must_include)
+        report = self._reviewing.carousel(carousel, target, must_include, choices.emphasize)
         return CarouselResult(carousel, dropped, report, fallback_code)
