@@ -351,7 +351,7 @@ async function loadBundle() {
   const agents = Number($("agents").value);
   if (!Number.isInteger(agents) || agents < 1) { fail(new Error("상담원 수를 1 이상의 숫자로 입력해 주세요.")); return false; }
   const b = await post("/api/bundle", {target_id: S.target, agents});
-  $("bundleTitle").textContent = `'${b.target.name}' 글에 넣을 내용`;
+  $("bundleTitle").textContent = `'${b.target.name}' 타깃 글에 넣을 내용`;
   $("proposed").hidden = b.target.status === "confirmed";
   $("aiReason").hidden = !b.reason; $("aiReason").textContent = b.reason ? "AI가 이 묶음을 고른 이유: " + b.reason : "";
   $("pains").innerHTML = b.pains.map((f) => `<li>${esc(f.statement)}<br><span class="small">${src(f)}</span></li>`).join("");
