@@ -78,6 +78,7 @@ class Guideline:
     emphasis: tuple[EmphasisItem, ...]
     footer: tuple[str, ...]
     title_keywords: tuple[str, ...] = ()
+    targets: tuple[str, ...] = ()  # target ids this guideline was written for; empty means all
 
 
 @dataclass(frozen=True)

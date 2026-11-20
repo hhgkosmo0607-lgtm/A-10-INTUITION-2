@@ -54,6 +54,7 @@ def guideline_from_json(raw: dict[str, Any]) -> Guideline:
         ),
         footer=tuple(raw["footer"]),
         title_keywords=tuple(raw.get("title_keywords", [])),
+        targets=tuple(raw.get("targets", [])),
     )
 
 

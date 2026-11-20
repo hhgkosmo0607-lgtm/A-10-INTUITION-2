@@ -206,5 +206,8 @@
     "tlinkcrm.com",
     "blog.naver.com/mobilecrm",
     "1877-3836"
+  ],
+  "targets": [
+    "field-sales"
   ]
 }

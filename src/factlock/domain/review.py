@@ -47,13 +47,18 @@ def _keywords(title: str, body: str, guideline: Guideline) -> RuleResult:
     findings = []
     for keyword in guideline.required_keywords:
         if not contains(title, keyword):
-            findings.append(Finding(f"제목에 필수 키워드 '{keyword}'가 없습니다."))
+            findings.append(Finding(f"제목에 필수 키워드가 없습니다: {keyword}"))
         if not contains(body, keyword):
-            findings.append(Finding(f"본문에 필수 키워드 '{keyword}'가 없습니다."))
+            findings.append(Finding(f"본문에 필수 키워드가 없습니다: {keyword}"))
     return _result("R1", "필수 키워드", findings)
 
 
-def _emphasis(text: str, guideline: Guideline) -> RuleResult:
+def _emphasis(text: str, guideline: Guideline, target: Target | None = None) -> RuleResult:
+    if target is not None and guideline.targets and target.id not in guideline.targets:
+        note = Finding(
+            f"이 가이드라인은 다른 타깃용이라 '{target.name}' 글에는 강조 항목 검사를 하지 않았습니다."
+        )
+        return RuleResult("R2", "강조 항목", Verdict.CHECK, (note,))
     findings = []
     unconfirmed = False
     for item in guideline.emphasis:
@@ -83,7 +88,7 @@ def _emphasis(text: str, guideline: Guideline) -> RuleResult:
 def _footer(text: str, guideline: Guideline) -> RuleResult:
     plain = text.replace("https://", "").replace("http://", "").replace("www.", "")
     findings = [
-        Finding(f"하단 정보 '{item}'가 없습니다.") for item in guideline.footer if not contains(plain, item)
+        Finding(f"하단 정보가 없습니다: {item}") for item in guideline.footer if not contains(plain, item)
     ]
     return _result("R3", "하단 정보", findings)
 
@@ -109,7 +114,7 @@ def _numbers(text: str, facts: Sequence[Fact]) -> tuple[RuleResult, RuleResult, 
                 settled.add(item.start)
                 locked.append(
                     Finding(
-                        f"'{item.text}'는 자료끼리 값이 달라 확인이 필요한 내용입니다. ({fact.statement})",
+                        f"자료끼리 값이 달라 확인이 필요한 내용입니다: {item.text} ({fact.statement})",
                         sentence,
                         (fact.id,),
                     )
@@ -125,7 +130,7 @@ def _numbers(text: str, facts: Sequence[Fact]) -> tuple[RuleResult, RuleResult, 
                 detail = "; ".join(fact.statement for fact in refs)
                 mismatch.append(
                     Finding(
-                        f"'{item.text}'가 자료와 다릅니다. 자료: {detail}",
+                        f"자료와 다른 값입니다: {item.text}. 자료: {detail}",
                         sentence,
                         tuple(f.id for f in refs),
                     )
@@ -133,7 +138,7 @@ def _numbers(text: str, facts: Sequence[Fact]) -> tuple[RuleResult, RuleResult, 
         for item in found:
             if item.start in settled or not is_checked(item.value) or item.value in known:
                 continue
-            unknown.append(Finding(f"'{item.text}'는 사실 목록에 없는 값입니다.", sentence))
+            unknown.append(Finding(f"사실 목록에 없는 값입니다: {item.text}", sentence))
     return (
         _result("R4", "자료와 다른 값", mismatch),
         _result("R5", "목록에 없는 값", unknown),
@@ -179,7 +184,7 @@ def _superlatives(text: str, facts: Sequence[Fact]) -> RuleResult:
             confirmed = any(f.status is FactStatus.CONFIRMED for f in backing)
             hedged = any(f.status is FactStatus.CLAIM for f in backing) and any(h in sentence for h in HEDGES)
             if not (confirmed or hedged):
-                findings.append(Finding(f"근거 없는 표현 '{word}'가 있습니다.", sentence))
+                findings.append(Finding(f"근거 없는 표현이 있습니다: {word}", sentence))
     return _result("R9", "최상급·비교", findings)
 
 
@@ -198,7 +203,7 @@ def review(
     return ReviewReport(
         (
             _keywords(title, body, guideline),
-            _emphasis(text, guideline),
+            _emphasis(text, guideline, target),
             _footer(text, guideline),
             r4,
             r5,

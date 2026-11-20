@@ -1,0 +1,255 @@
+{
+  "title": "티링크 비즈레코딩 소개: 영업사원 통화관리를 통화요약과 업무자동화로 바꾸는 콜센터 프로그램",
+  "blocks": [
+    {
+      "type": "sentence",
+      "text": "이 글은 티링크가 제공한 자료를 바탕으로 작성한 협찬 소개 글입니다.",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "안녕하세요. 오늘은 외근이 많은 영업 조직을 위한 티링크 비즈레코딩을 소개합니다.",
+      "fact_ids": [
+        "PROD-NAME"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "티링크 비즈레코딩은 영업사원 통화관리를 위해 휴대폰 통화녹음과 인터넷전화 자동녹취를 한곳에 모으는 콜센터 프로그램입니다.",
+      "fact_ids": [
+        "PROD-NAME",
+        "PROD-MOBILE",
+        "FEAT-UNIFIED"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "통화 기록을 사람이 따로 적지 않아도 되는 업무자동화가 이 글의 주제입니다.",
+      "fact_ids": []
+    },
+    {
+      "type": "heading",
+      "text": "기존 영업관리의 문제",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "휴대폰으로 통화하면 녹음이 직원 개인 폰에만 남고, 누가 어떤 고객과 무슨 이야기를 했는지 회사에서 알 수 없습니다.",
+      "fact_ids": [
+        "PAIN-MOBILE"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "영업직원은 통화 후 CRM에 기록을 남기지 않고, 회의록은 불완전하거나 미작성 상태로 남습니다.",
+      "fact_ids": [
+        "PAIN-NO-RECORD"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "휴대폰과 인터넷전화를 함께 녹음합니다",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "사무실 인터넷 전화기, 외근 중 스마트폰, 재택 소프트폰의 통화가 하나의 녹취 서버에 모입니다.",
+      "fact_ids": [
+        "FEAT-UNIFIED"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "사무실에서는 인터넷전화, 외근 중에는 휴대폰, 집에서는 PC폰을 쓰면 됩니다.",
+      "fact_ids": [
+        "FEAT-UNIFIED",
+        "PROD-PCPHONE"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "통신사는 LG, SK, KT, 삼성SDS 회선을 모두 녹취할 수 있습니다.",
+      "fact_ids": [
+        "FEAT-CARRIER"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "티링크 모바일은 휴대폰 녹취 파일을 중앙 서버로 전송해 보관합니다.",
+      "fact_ids": [
+        "PROD-MOBILE"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "다만 티링크 모바일은 안드로이드 10 이상에서 사용할 수 있고 아이폰은 사용할 수 없습니다.",
+      "fact_ids": [
+        "PROD-MOBILE",
+        "COND-ANDROID"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "라우터와 패킷 미러링 스위치로 통화를 복제해 녹음하므로 기존 회선과 전화기를 바꾸지 않습니다.",
+      "fact_ids": [
+        "FEAT-MIRROR"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "통화가 끝나면 자동으로 기록됩니다",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "통화가 끝나면 STT 문자변환, 한 줄 요약, 키워드, 화자별 대화가 기록됩니다.",
+      "fact_ids": [
+        "FEAT-STT"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "AI 통화요약과 함께 고객 요청사항과 후속 조치 내용도 자동으로 기록된다고 가이드라인은 설명합니다.",
+      "fact_ids": [
+        "FEAT-FOLLOWUP"
+      ]
+    },
+    {
+      "type": "experience_slot",
+      "text": "직접 통화 한 건을 녹음하고, 녹취 결과와 AI 요약이 생성되는 과정을 화면 이미지와 함께 적어 주세요",
+      "fact_ids": []
+    },
+    {
+      "type": "heading",
+      "text": "영업사원 관리",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "통화 통계는 총 통화, 수신·발신, 평균 통화시간, 담당자별 통화량을 보여 줍니다.",
+      "fact_ids": [
+        "FEAT-STATS"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "고객 화면에 그 고객의 상담 이력과 통화·문자·주문 이력이 쌓입니다.",
+      "fact_ids": [
+        "FEAT-HISTORY"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "통화 기록이 CRM에 연결되어, 담당자가 변경되어도 이전 상담 이력을 빠르게 확인할 수 있다고 합니다.",
+      "fact_ids": [
+        "FEAT-REASSIGN"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "경영진을 위한 종합리포트",
+      "fact_ids": [
+        "PROD-REPORT"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "종합리포트는 경영 분석 대시보드, 상담원 역량 분석, 인사고과 평가표, 신입사원 교육자료로 이루어집니다.",
+      "fact_ids": [
+        "PROD-REPORT"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "경영 분석 대시보드는 핵심 지표, 영업기회 현황, 미결 건 추적, 해지 위험 고객 조기경보, RED 알림을 보여 줍니다.",
+      "fact_ids": [
+        "FEAT-DASH"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "일일 리포트가 통화·상담·매출 현황을 요약하므로, 보고서를 따로 쓰는 일을 줄일 수 있습니다.",
+      "fact_ids": [
+        "FEAT-DAILY"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "상담원 역량 분석과 인사고과 평가표는 통화 원문을 근거로 하므로 코칭과 성과 관리의 근거가 됩니다.",
+      "fact_ids": [
+        "FEAT-EVAL"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "보안",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "녹취파일은 AES256으로, 비밀번호는 SHA256으로 암호화합니다.",
+      "fact_ids": [
+        "FEAT-SECURITY"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "권한은 상담원과 매니저로 나뉘고, 통계와 리포트는 매니저 이상만 볼 수 있습니다.",
+      "fact_ids": [
+        "FEAT-ROLE"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "비용",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "A타입(고객관리 + 녹취 + 문자변환·요약 + 일일보고서)은 상담원당 월 30,000원입니다.",
+      "fact_ids": [
+        "PRICE-A"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "종합리포트는 A타입을 선택한 경우에만 이용할 수 있고, 월 100,000원이며 매월 3회까지 생성할 수 있습니다.",
+      "fact_ids": [
+        "PRICE-REPORT",
+        "PROD-REPORT",
+        "COND-ATYPE"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "가격은 부가세 별도의 예시 견적이며 정확한 비용은 상담 후 확정됩니다. A·B·C 타입은 상담원 최소 3명부터입니다.",
+      "fact_ids": [
+        "COND-VAT",
+        "COND-ESTIMATE",
+        "COND-MIN3"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "마무리",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "통화가 끝나면, 보고서가 시작됩니다.",
+      "fact_ids": [
+        "PHRASE-REPORT"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "단순한 통화녹음 서비스가 아니라, 영업 활동을 자동으로 기록하고 경영에 필요한 정보로 정리해 주는 기업용 영업관리 솔루션입니다.",
+      "fact_ids": []
+    },
+    {
+      "type": "footer",
+      "text": "",
+      "fact_ids": []
+    }
+  ]
+}

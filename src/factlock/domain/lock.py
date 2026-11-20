@@ -23,14 +23,14 @@ def _check(block: Block, by_id: dict[str, Fact], named: Sequence[Fact]) -> str:
     allowed = {value for fact in refs for value in fact.values}
     for item in extract_values(block.text):
         if is_checked(item.value) and item.value not in allowed:
-            return f"'{item.text}'가 근거 사실에 없는 값입니다."
+            return f"근거 사실에 없는 값입니다: {item.text}"
     cited = set(block.fact_ids)
     for fact in named:
         if fact.id not in cited and any(contains(block.text, anchor) for anchor in fact.anchors):
-            return f"'{fact.anchors[0]}'을(를) 말하지만 근거 번호 {fact.id}가 붙어 있지 않습니다."
+            return f"제품을 말하지만 근거 번호 {fact.id}가 붙어 있지 않습니다: {fact.anchors[0]}"
     for word in SUPERLATIVES:
         if word in block.text and not any(word in fact.statement for fact in refs):
-            return f"근거 없는 표현 '{word}'가 있습니다."
+            return f"근거 없는 표현이 있습니다: {word}"
     return ""
 
 

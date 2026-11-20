@@ -1,0 +1,165 @@
+{
+  "title": "재택 콜센터를 위한 콜센터 프로그램: 티링크 PC폰과 통화요약으로 업무자동화",
+  "blocks": [
+    {
+      "type": "sentence",
+      "text": "이 글은 티링크가 제공한 자료를 바탕으로 작성한 협찬 소개 글입니다.",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "안녕하세요. 오늘은 재택근무 상담 조직을 위한 콜센터 프로그램 구성과 업무자동화 방법을 소개합니다.",
+      "fact_ids": []
+    },
+    {
+      "type": "heading",
+      "text": "재택 상담의 고민",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "재택근무에서는 개인 휴대폰으로 전화를 받게 되고 고객에게 개인 번호가 남습니다.",
+      "fact_ids": [
+        "PAIN-REMOTE"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "재택근무자가 늘면 직원마다 전화기를 새로 놓아야 하는지가 고민입니다.",
+      "fact_ids": [
+        "PAIN-PHONE-SET"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "전화기 없이 PC로 걸고 받습니다",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "티링크 PC폰(TlinkPhone)은 전화기 없이 PC에 설치해 쓰는 전화기입니다.",
+      "fact_ids": [
+        "PROD-PCPHONE"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "PC폰은 사무실, 재택, 외근 어디서나 같은 내선번호로 걸고 받습니다.",
+      "fact_ids": [
+        "PROD-PCPHONE",
+        "FEAT-PCANY"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "PC폰은 통화 중 음성을 글로 바꿔 보여 주는 실시간 STT를 지원하며, 이 기능은 별도 부가서비스입니다.",
+      "fact_ids": [
+        "PROD-PCPHONE",
+        "FEAT-PCSTT",
+        "COND-PCADDON"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "콜센터 운영과 녹취",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "티링크 비즈는 상담 현황판, 자동 배분, 콜백 예약, IVR, 녹취 연동을 묶은 콜센터 솔루션입니다.",
+      "fact_ids": [
+        "PROD-BIZ"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "티링크 AI 녹취는 인터넷전화·스마트폰·소프트폰 통화를 하나의 녹취 서버에 모으고 STT로 글로 바꿔 요약합니다.",
+      "fact_ids": [
+        "PROD-RECORDING"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "통화가 끝나면 STT 문자변환, 한 줄 요약, 키워드, 화자별 대화가 기록되어 통화요약을 따로 쓰지 않아도 됩니다.",
+      "fact_ids": [
+        "FEAT-STT"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "티링크 콜백은 모든 상담원이 통화 중일 때 고객을 대기시키고 통화 대기 목록을 보여 줍니다.",
+      "fact_ids": [
+        "FEAT-CALLBACK"
+      ]
+    },
+    {
+      "type": "experience_slot",
+      "text": "재택 환경에서 PC폰으로 전화를 받고 녹취와 요약을 확인한 과정을 화면 이미지와 함께 적어 주세요",
+      "fact_ids": []
+    },
+    {
+      "type": "heading",
+      "text": "보안",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "녹취파일은 AES256으로, 비밀번호는 SHA256으로 암호화합니다.",
+      "fact_ids": [
+        "FEAT-SECURITY"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "비용",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "A타입(고객관리 + 녹취 + 문자변환·요약 + 일일보고서)은 상담원당 월 30,000원입니다.",
+      "fact_ids": [
+        "PRICE-A"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "IVR(대표번호 안내멘트)은 월 20,000원, 설정비 50,000원입니다.",
+      "fact_ids": [
+        "PRICE-IVR"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "콜백은 월 20,000원, 설정비 50,000원입니다.",
+      "fact_ids": [
+        "PRICE-CALLBACK"
+      ]
+    },
+    {
+      "type": "sentence",
+      "text": "가격은 부가세 별도의 예시 견적이며 정확한 비용은 상담 후 확정됩니다. A·B·C 타입은 상담원 최소 3명부터입니다.",
+      "fact_ids": [
+        "COND-VAT",
+        "COND-ESTIMATE",
+        "COND-MIN3"
+      ]
+    },
+    {
+      "type": "heading",
+      "text": "마무리",
+      "fact_ids": []
+    },
+    {
+      "type": "sentence",
+      "text": "기록은 AI에게, 성장은 당신에게.",
+      "fact_ids": [
+        "PHRASE-AI"
+      ]
+    },
+    {
+      "type": "footer",
+      "text": "",
+      "fact_ids": []
+    }
+  ]
+}

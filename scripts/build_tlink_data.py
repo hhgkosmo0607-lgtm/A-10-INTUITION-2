@@ -486,6 +486,7 @@ GUIDELINE = {
     "title_keywords": ["티링크 비즈레코딩", "영업사원 통화관리", "휴대폰 통화녹음", "인터넷전화 자동녹취"],
     "emphasis": [{"no": n, "text": t, "any_of": a, "terms_confirmed": False} for n, t, a in E],
     "footer": ["tlinkcrm.com", "blog.naver.com/mobilecrm", "1877-3836"],
+    "targets": ["field-sales"],
 }
 
 if __name__ == "__main__":
