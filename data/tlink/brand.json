@@ -1,6 +1,9 @@
 {
   "name": "T-LINK",
-  "background": "#101a45",
+  "background": "#6b9bfd",
   "text": "#ffffff",
-  "accent": "#8fb4ff"
+  "accent": "#27397f",
+  "deep": "#2a3a80",
+  "mid": "#3c68cc",
+  "badge": "#4b5bf2"
 }

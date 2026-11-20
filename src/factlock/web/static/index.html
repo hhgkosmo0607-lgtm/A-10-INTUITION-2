@@ -3,20 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>팩트락 · 사실만 쓰는 광고 제작</title>
+<title>애드체크 · 사실만 쓰는 광고 제작</title>
 <style>
 :root{--bg:#f6f5f1;--card:#fff;--ink:#1c1b19;--sub:#5d5b55;--line:#dedbd2;--accent:#1f5fa8;--accent-bg:#e8f1fb;
 --ok:#256b2c;--ok-bg:#e7f3e4;--bad:#a12b2b;--bad-bg:#fbeaea;--warn:#7a4b06;--warn-bg:#fbefd8}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
-header{padding:18px 20px 0;max-width:980px;margin:0 auto;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
-header h1{font-size:20px;margin:0}
-header p{margin:0;color:var(--sub);font-size:14px}
-main{max-width:980px;margin:0 auto;padding:14px 20px 60px}
-.steps{display:flex;gap:6px;margin:10px 0 16px;flex-wrap:wrap}
-.steps button{flex:1 1 130px;padding:10px 8px;border:1px solid var(--line);background:var(--card);border-radius:10px;font:inherit;font-size:14px;color:var(--sub);cursor:pointer}
+.shell{display:grid;grid-template-columns:232px minmax(0,1fr);min-height:100vh}
+.side{background:var(--card);border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;align-self:start;height:100vh;overflow:auto}
+.side h1{font-size:22px;margin:0 0 4px}
+.tagline{margin:0 0 18px;color:var(--sub);font-size:13px;line-height:1.5}
+main{max-width:980px;width:100%;margin:0 auto;padding:22px 24px 60px}
+.steps{display:flex;flex-direction:column;gap:4px;margin:0 0 18px}
+.grp{font-size:12px;color:var(--sub);margin:12px 4px 4px;font-weight:600}
+.steps button{text-align:left;padding:10px 12px;border:1px solid transparent;background:none;border-radius:10px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer}
+.steps button:hover:not(:disabled){background:var(--bg)}
 .steps button[aria-current="step"]{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:600}
-.steps button:disabled{opacity:.45;cursor:not-allowed}
+.steps button:disabled{opacity:.4;cursor:not-allowed}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
 h2{font-size:18px;margin:0 0 10px}
 h3{font-size:15px;margin:16px 0 6px}
@@ -71,22 +74,34 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
 .post img{margin:6px 0 14px}
 select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid var(--line);background:#fff;width:100%;margin-top:5px}
 [hidden]{display:none!important}
-@media (max-width:560px){main,header{padding-left:14px;padding-right:14px}.card{padding:14px}}
+@media (max-width:760px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px}
+  .tagline{margin-bottom:10px}
+  .steps{flex-direction:row;flex-wrap:wrap;margin-bottom:8px}
+  .steps button{flex:1 1 120px;border-color:var(--line);text-align:center;font-size:14px}
+  .grp{display:none}
+  main{padding:14px 14px 50px}.card{padding:14px}
+}
 </style>
 </head>
 <body>
-<header>
-  <h1>팩트락</h1>
-  <p>회사 자료에 있는 사실만으로 광고 글을 만들고 검수합니다 · <span id="liveBadge"></span></p>
-</header>
-<main>
-  <nav class="steps" aria-label="단계">
+<div class="shell">
+<aside class="side">
+  <h1>애드체크</h1>
+  <p class="tagline">회사 자료에 있는 사실만으로 광고를 만들고 검수합니다</p>
+  <nav class="steps" aria-label="메뉴">
+    <span class="grp">광고 제작</span>
     <button data-step="1">1 타깃 선택</button>
     <button data-step="2">2 내용 구성</button>
     <button data-step="3">3 결과물</button>
+    <span class="grp">자료 관리</span>
     <button data-step="6">사실 목록</button>
     <button data-step="7">자료 저장소</button>
   </nav>
+  <p class="small" id="liveBadge"></p>
+</aside>
+<main>
   <div id="error" class="err" role="alert" hidden></div>
 
   <section id="s1" class="card">
@@ -234,6 +249,7 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <div class="cards" id="assetGrid" style="margin-top:12px"></div>
   </section>
 </main>
+</div>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -321,7 +337,7 @@ const ART = [
   {id: "art-team", caption: "상담원 통계 (예시 그림)", words: ["상담원", "통계", "통화량", "직원", "관리", "고객"]},
 ];
 function artSvg(kind) {
-  const b = S.state.brand, navy = b.background, acc = b.accent, soft = "#e9eefb", line = "#cfd8f0", ink = "#33405f";
+  const b = S.state.brand, navy = b.deep || b.background, acc = b.deep ? b.background : b.accent, soft = "#e9eefb", line = "#cfd8f0", ink = "#33405f";
   const win = (x, y, w, h, inner) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="22" fill="#fff" stroke="${line}" stroke-width="3"/><rect x="${x}" y="${y}" width="${w}" height="54" rx="22" fill="${navy}"/><rect x="${x}" y="${y + 30}" width="${w}" height="24" fill="${navy}"/><circle cx="${x + 34}" cy="${y + 27}" r="8" fill="${acc}"/><circle cx="${x + 62}" cy="${y + 27}" r="8" fill="#fff" opacity=".5"/>${inner}`;
   const bar = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(h, w) / 2}" fill="${c}"/>`;
   let body = "";
@@ -502,28 +518,33 @@ function drawCard(canvas, slide, index, total) {
   const img = slide.asset ? S.imgs.get(slide.asset) : null, ready = img && img.complete && img.naturalWidth;
   const isArt = ready && slide.asset.startsWith("art-");
   ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H);
+  if (b.deep && !(ready && !isArt)) {  // soft circles from the brand palette
+    ctx.fillStyle = b.mid || b.deep; ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.arc(W - 30, 110, 250, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = b.deep; ctx.globalAlpha = 0.92; ctx.beginPath(); ctx.arc(30, H + 10, 300, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+  }
   if (ready && !isArt) {  // a real photo fills the card under a dark veil so the words stay readable
     const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * scale, h = img.naturalHeight * scale;
     ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
-    ctx.globalAlpha = 0.78; ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.8; ctx.fillStyle = b.deep || b.background; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
   }
-  ctx.fillStyle = b.accent; ctx.fillRect(80, 150, 90, 8);
+  const onPhoto = ready && !isArt, label = onPhoto ? (b.deep ? b.background : b.accent) : b.accent;
+  ctx.fillStyle = label; ctx.fillRect(80, 150, 90, 8);
   ctx.textBaseline = "top"; ctx.fillStyle = b.text;
   ctx.font = `700 34px ${font}`; ctx.fillText(b.name, 80, 80);
   ctx.globalAlpha = 0.7; ctx.textAlign = "right"; ctx.font = `500 32px ${font}`; ctx.fillText(`${index} / ${total}`, W - 80, 82); ctx.textAlign = "left"; ctx.globalAlpha = 1;
   let y = isArt ? 220 : 420;
   const big = isArt ? 84 : 96;
-  ctx.fillStyle = b.accent; ctx.font = `700 40px ${font}`; ctx.fillText(slide.kicker, 80, y); y += 78;
+  ctx.fillStyle = label; ctx.font = `700 40px ${font}`; ctx.fillText(slide.kicker, 80, y); y += 78;
   ctx.fillStyle = b.text; ctx.font = `800 ${big}px ${font}`;
   for (const line of wrapLines(ctx, slide.headline, W - 160)) { ctx.fillText(line, 80, y); y += Math.round(big * 1.28); }
-  y += 30; ctx.globalAlpha = 0.9; ctx.font = `400 ${isArt ? 40 : 44}px ${font}`;
+  y += 30; ctx.font = `500 ${isArt ? 40 : 44}px ${font}`;
   for (const line of wrapLines(ctx, slide.body, W - 160)) { ctx.fillText(line, 80, y); y += isArt ? 60 : 66; }
   ctx.globalAlpha = 1;
   if (isArt) {  // an illustration sits in its own panel below the words
     const pw = 720, ph = 480, px = W - 80 - pw, py = Math.max(y + 40, H - 90 - ph), r = 28;
     ctx.save(); ctx.beginPath(); ctx.roundRect(px, py, pw, ph, r); ctx.clip(); ctx.drawImage(img, px, py, pw, ph); ctx.restore();
   }
-  ctx.globalAlpha = 0.55; ctx.fillStyle = b.text; ctx.font = `400 26px ${font}`; ctx.fillText("회사 자료에 근거해 만든 광고", 80, H - 64); ctx.globalAlpha = 1;
+  ctx.globalAlpha = 0.8; ctx.fillStyle = b.text; ctx.font = `400 26px ${font}`; ctx.fillText("회사 자료에 근거해 만든 광고", 80, H - 64); ctx.globalAlpha = 1;
 }
 function carSlides() {
   return [...document.querySelectorAll(".cardbox")].map((box) => ({kicker: box.querySelector(".k").value, headline: box.querySelector(".h").value, body: box.querySelector(".b").value, asset: box.querySelector(".img").value}));

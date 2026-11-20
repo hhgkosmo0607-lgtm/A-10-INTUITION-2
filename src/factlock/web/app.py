@@ -112,7 +112,7 @@ def create_app(
     assets: AssetLibrary | None = None,
     max_document_bytes: int = 30 * 1024 * 1024,
 ) -> FastAPI:
-    app = FastAPI(title="FactLock", docs_url=None, redoc_url=None)
+    app = FastAPI(title="AdCheck", docs_url=None, redoc_url=None)
 
     def guideline_view() -> dict[str, Any]:
         g = service.guideline
