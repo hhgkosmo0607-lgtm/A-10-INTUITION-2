@@ -103,7 +103,7 @@ def _same_unit(found: Iterable[Found], units: set[str]) -> list[Found]:
 
 
 def _numbers(text: str, facts: Sequence[Fact]) -> tuple[RuleResult, RuleResult, RuleResult]:
-    usable = [f for f in facts if f.status is not FactStatus.CONFLICT]
+    usable = [f for f in facts if f.status in (FactStatus.CONFIRMED, FactStatus.CLAIM)]
     conflicts = [f for f in facts if f.status is FactStatus.CONFLICT]
     known: set[Value] = {value for fact in usable for value in fact.values}
     mismatch: list[Finding] = []
@@ -154,7 +154,7 @@ def _numbers(text: str, facts: Sequence[Fact]) -> tuple[RuleResult, RuleResult, 
 def _conditions(text: str, facts: Sequence[Fact], target: Target | None) -> RuleResult:
     by_id = {fact.id: fact for fact in facts}
     needed: dict[str, list[str]] = {}
-    for fact in used_facts(text, [f for f in facts if f.status is not FactStatus.CONFLICT]):
+    for fact in used_facts(text, [f for f in facts if f.status in (FactStatus.CONFIRMED, FactStatus.CLAIM)]):
         for condition_id in fact.requires:
             needed.setdefault(condition_id, []).append(fact.id)
     if target is not None:

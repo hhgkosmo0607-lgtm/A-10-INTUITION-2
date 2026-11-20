@@ -17,6 +17,8 @@ def _check(block: Block, by_id: dict[str, Fact], named: Sequence[Fact]) -> str:
             return f"근거 번호 {fact_id}가 사실 목록에 없습니다."
         if fact.status is FactStatus.CONFLICT:
             return f"근거 {fact_id}는 확인이 필요한 사실이라 쓸 수 없습니다."
+        if fact.status is FactStatus.PENDING:
+            return f"근거 {fact_id}는 담당자가 아직 확정하지 않은 사실이라 쓸 수 없습니다."
         if fact.status is FactStatus.CLAIM and not any(h in block.text for h in HEDGES):
             return f"근거 {fact_id}는 회사 주장입니다. 주장임이 드러나는 표현이 필요합니다."
         refs.append(fact)

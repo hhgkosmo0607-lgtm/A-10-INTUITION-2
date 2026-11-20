@@ -8,6 +8,7 @@ class FactStatus(StrEnum):
     CONFIRMED = "confirmed"
     CONFLICT = "conflict"
     CLAIM = "claim"
+    PENDING = "pending"  # read from a document by AI, not yet confirmed by a person
 
 
 class Verdict(StrEnum):
@@ -28,6 +29,8 @@ class Value:
 class Source:
     where: str
     checked: str
+    url: str = ""  # public page, when the source is online
+    quote: str = ""  # exact words in the source that support the fact
 
 
 @dataclass(frozen=True)

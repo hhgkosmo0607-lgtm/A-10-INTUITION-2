@@ -1,6 +1,7 @@
 """Write data/tlink/*.json from one readable table. Edit here, then run: uv run python scripts/build_tlink_data.py"""
 
 import json
+import urllib.parse
 from pathlib import Path
 
 D = "2026-11-20"
@@ -12,8 +13,48 @@ def won(*amounts: int) -> list[dict[str, object]]:
     return [{"amount": a, "unit": "원"} for a in amounts]
 
 
+BASE = "https://www.tlinkcrm.com/"
+BLOG = "https://blog.naver.com/mobilecrm/"
+# More specific hints first, so "티링크 비즈" does not win over a more specific page name.
+PAGES = {
+    "공식 블로그 2026-10-06 모바일 CRM 글": BLOG + "224433241171",
+    "공식 블로그 2026-09-30 AI 녹취 글": BLOG + "224427082392",
+    "공식 블로그 2026-10-06 PC폰 글": BLOG + "224433250722",
+    "공식 블로그 2026-10-06 콜백 글": BLOG + "224433086858",
+    "공식 블로그 2026-10-06 고객관리 글": BLOG + "224433059285",
+    "상담신청 페이지": BASE + "center.php",
+    "AI 경영분석 보고서": BASE + "report.php",
+    "보고서 예시": BASE + "management.php",
+    "학교용 녹취": BASE + "school.php",
+    "티링크 모바일": BASE + "mobile.php",
+    "티링크 PC폰": BASE + "softphone.php",
+    "티링크 콜백": BASE + "callback.php",
+    "티링크 비즈": BASE + "bizsolution.php",
+    "티링크 온": BASE + "tlinkon.php",
+    "인터넷전화": BASE + "ipphone.php",
+    "AI 녹취": BASE + "recording.php",
+    "회사소개": BASE + "info.php",
+    "연혁": BASE + "history.php",
+    "첫 화면": BASE,
+}
+# Exact words on the page, so the browser can jump to and highlight them.
+QUOTES = {
+    "COND-ANDROID": "아이폰 사용 불가",
+    "COND-MIN3": "최소 3명",
+    "COND-PCADDON": "별도 부가서비스 신청이 필요합니다",
+    "NUM-RATE": "녹취 성공률",
+    "PRICE-MOBILE": "1 USER 20,000원",
+}
+
+
 def fact(id: str, kind: str, statement: str, where: str, **extra: object) -> dict[str, object]:
-    return {"id": id, "kind": kind, "statement": statement, "source": {"where": where, "checked": D}, **extra}
+    """Online sources get a page link; received files (guideline, manuals, proposal) get none."""
+    url = next((link for hint, link in PAGES.items() if hint in where), "")
+    quote = QUOTES.get(id, "")
+    if url and quote:
+        url += "#:~:text=" + urllib.parse.quote(quote)
+    source = {"where": where, "checked": D, "url": url, "quote": quote}
+    return {"id": id, "kind": kind, "statement": statement, "source": source, **extra}
 
 
 PRICE_REQ = ["COND-VAT", "COND-ESTIMATE"]

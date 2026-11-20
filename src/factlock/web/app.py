@@ -9,9 +9,10 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from factlock.application.service import FactLockService, Unavailable, UnknownTarget
+from factlock.adapters.doc_text import MAX_BYTES, read_document
+from factlock.application.service import FactLockService, Unavailable, UnknownFact, UnknownTarget
 from factlock.domain.models import Fact, ReviewReport
-from factlock.ports import GuidelineError, GuidelineReader
+from factlock.ports import DocumentError, GuidelineError, GuidelineReader
 
 STATIC = Path(__file__).parent / "static"
 MAX_UPLOAD = 2 * 1024 * 1024
@@ -35,6 +36,12 @@ AI_MESSAGES = {
     "claude_rate_limited": "AI 요청 한도에 걸렸습니다.",
     "claude_unreachable": "AI 서버에 연결하지 못했습니다.",
     "claude_refused": "AI가 요청을 거절했습니다.",
+}
+DOCUMENT_MESSAGES = {
+    "document_too_large": "파일이 30MB를 넘습니다.",
+    "document_type_unsupported": "읽을 수 있는 형식은 PDF, PPTX, DOCX, XLSX, TXT, MD입니다.",
+    "document_unreadable": "파일을 읽지 못했습니다. 암호가 걸렸거나 손상된 파일일 수 있습니다.",
+    "document_has_no_text": "글자를 찾지 못했습니다. 그림으로만 된 문서일 수 있습니다.",
 }
 AI_DEFAULT = "AI가 답하지 못했습니다. 잠시 뒤 다시 시도해 주세요."
 
@@ -71,6 +78,8 @@ def _fact(fact: Fact) -> dict[str, Any]:
         "statement": fact.statement,
         "status": fact.status.value,
         "source": fact.source.where,
+        "url": fact.source.url,
+        "quote": fact.source.quote,
         "checked": fact.source.checked,
         "scope": fact.scope,
     }
@@ -117,13 +126,51 @@ def create_app(service: FactLockService, reader: GuidelineReader, engine_name: s
             "guideline": guideline_view(),
             "fact_counts": {
                 status: sum(1 for f in facts if f.status.value == status)
-                for status in ("confirmed", "conflict", "claim")
+                for status in ("confirmed", "conflict", "claim", "pending")
             },
         }
 
     @app.get("/api/facts")
     def facts() -> list[dict[str, Any]]:
         return [_fact(fact) for fact in service.facts]
+
+    @app.post("/api/documents")
+    async def documents(file: UploadFile = File(...)) -> dict[str, Any]:  # noqa: B008
+        data = await file.read(MAX_BYTES + 1)
+        try:
+            pages = read_document(file.filename or "", data)
+        except DocumentError as error:
+            message = DOCUMENT_MESSAGES.get(error.code, "문서를 읽지 못했습니다.")
+            raise HTTPException(400, {"code": error.code, "message": message}) from None
+        try:
+            result = service.ingest_document(file.filename or "문서", [(p.locator, p.text) for p in pages])
+        except Unavailable as error:
+            raise HTTPException(503, {"code": error.code, "message": ai_message(error.code)}) from None
+        return {
+            "added": [_fact(f) for f in result.added],
+            "rejected": [asdict(item) for item in result.rejected],
+            "pages_read": result.pages_read,
+            "pages_skipped": result.pages_skipped,
+        }
+
+    @app.post("/api/facts/{fact_id}/confirm")
+    def confirm(fact_id: str) -> dict[str, Any]:
+        try:
+            return _fact(service.confirm_fact(fact_id))
+        except UnknownFact:
+            raise HTTPException(
+                404, {"code": "unknown_fact", "message": "문서에서 읽은 사실만 확정할 수 있습니다."}
+            ) from None
+
+    @app.delete("/api/facts/{fact_id}")
+    def discard(fact_id: str) -> dict[str, Any]:
+        try:
+            service.discard_fact(fact_id)
+        except UnknownFact:
+            raise HTTPException(
+                404, {"code": "unknown_fact", "message": "문서에서 읽은 사실만 지울 수 있습니다."}
+            ) from None
+        return {"deleted": fact_id}
 
     @app.post("/api/bundle")
     def bundle(body: BundleIn) -> dict[str, Any]:

@@ -45,12 +45,15 @@ td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .slot{border:1.5px dashed var(--warn);border-radius:10px;padding:10px 12px;margin:10px 0;background:#fffdf6}
 .slot textarea{min-height:90px;margin-top:6px}
 .factbox{border-left:3px solid var(--accent);background:var(--accent-bg);padding:8px 12px;font-size:14px;margin:8px 0;border-radius:0}
-.stat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:6px 0 12px}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:6px 0 12px}
 .stat div{background:var(--bg);border-radius:10px;padding:10px 12px}
 .stat b{display:block;font-size:24px}
 ul{margin:4px 0 4px 18px;padding:0}
 li{margin:2px 0}
 .small{font-size:13px;color:var(--sub)}
+.quote{font-size:13px;color:var(--ink);background:var(--bg);border-radius:6px;padding:1px 6px;display:inline-block;margin-top:3px}
+a{color:var(--accent)}
+td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
 .post{border:1px solid var(--line);border-radius:12px;padding:22px 24px;background:#fff;max-width:720px}
 .post h4{font-size:22px;line-height:1.4;margin:0 0 14px}
 .post p{margin:0 0 10px}
@@ -157,6 +160,11 @@ li{margin:2px 0}
     <h2>사실 목록</h2>
     <p class="sub">광고 문구는 이 목록의 '확정' 사실로만 씁니다. '확인 필요'는 자료끼리 값이 달라 쓸 수 없습니다.</p>
     <div class="stat" id="factStat"></div>
+    <h3>사내 문서에서 사실 읽기</h3>
+    <p class="sub">PDF, PPTX, DOCX, XLSX, TXT 파일을 올리면 AI가 광고에 쓸 사실을 뽑습니다. 문서에 실제로 있는 문장을 인용한 것만 남고, 담당자가 [확정]을 눌러야 글에 쓸 수 있습니다.</p>
+    <div class="row"><input type="file" id="docFile" accept=".pdf,.pptx,.docx,.xlsx,.txt,.md" aria-label="사내 문서 파일"><button class="ghost" id="docUpload">문서 읽기</button></div>
+    <div id="docResult"></div>
+    <h3>전체 사실</h3>
     <div class="row" style="margin-bottom:8px"><input type="text" id="factQ" placeholder="낱말로 찾기" style="flex:1 1 200px" aria-label="사실 찾기"></div>
     <table><thead><tr><th>번호</th><th>사실</th><th>상태</th><th>출처</th></tr></thead><tbody id="facts"></tbody></table>
   </section>
@@ -164,9 +172,13 @@ li{margin:2px 0}
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const src = (f) => {
+  const where = /^https:\/\//.test(f.url || "") ? `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.source)} ↗</a>` : esc(f.source);
+  return where + (f.quote ? `<br><span class="quote">원문: “${esc(f.quote)}”</span>` : "");
+};
 const won = (n) => Number(n).toLocaleString("ko-KR") + "원";
 const VERDICT = {pass: "통과", fail: "실패", check: "확인 필요"};
-const STATUS = {confirmed: ["확정", "pass"], conflict: ["확인 필요", "fail"], claim: ["회사 주장", "check"]};
+const STATUS = {confirmed: ["확정", "pass"], conflict: ["확인 필요", "fail"], claim: ["회사 주장", "check"], pending: ["확정 대기", "check"]};
 const S = {step: 1, target: null, state: null, draft: null, facts: null, reached: 1};
 
 async function api(path, options) {
@@ -230,7 +242,7 @@ async function init() {
   S.state = await api("/api/state");
   $("liveBadge").textContent = S.state.live ? `AI 연결됨 (${S.state.engine})` : "연결된 AI 없음 (저장된 초안 사용)";
   $("ai4").checked = $("ai5").checked = S.state.live; $("ai4").disabled = $("ai5").disabled = !S.state.live;
-  $("planBtn").disabled = !S.state.live;
+  $("planBtn").disabled = $("docUpload").disabled = !S.state.live;
   renderTargets();
   renderGuide(S.state.guideline);
   if (!S.state.live) { $("useStored").checked = true; $("useStored").disabled = true; }
@@ -244,8 +256,8 @@ async function loadBundle() {
   $("bundleTitle").textContent = `'${b.target.name}'에 맞춘 추천 구성`;
   $("proposed").hidden = b.target.status === "confirmed";
   $("aiReason").hidden = !b.reason; $("aiReason").textContent = b.reason ? "AI가 이 묶음을 고른 이유: " + b.reason : "";
-  $("pains").innerHTML = b.pains.map((f) => `<li>${esc(f.statement)} <span class="small">(${esc(f.source)})</span></li>`).join("");
-  $("products").innerHTML = b.products.map((f) => `<tr><td>${esc(f.statement)}</td><td class="small">${esc(f.source)}</td></tr>`).join("");
+  $("pains").innerHTML = b.pains.map((f) => `<li>${esc(f.statement)}<br><span class="small">${src(f)}</span></li>`).join("");
+  $("products").innerHTML = b.products.map((f) => `<tr><td>${esc(f.statement)}</td><td class="small">${src(f)}</td></tr>`).join("");
   $("conds").innerHTML = b.conditions.map((f) => `<li>${esc(f.statement)}</li>`).join("") || "<li>없음</li>";
   const q = b.quote;
   if (!q.ok) { $("quote").innerHTML = `<div class="note">${esc(q.reason)}</div>`; return true; }
@@ -281,7 +293,7 @@ function renderDraft(d) {
   $("factPop").hidden = true;
   $("draft").querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
     const f = d.facts[c.dataset.fact]; if (!f) return;
-    $("factPop").innerHTML = `<b>${esc(f.id)}</b> <span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span><br>${esc(f.statement)}<br><span class="small">출처: ${esc(f.source)} · 확인한 날: ${esc(f.checked)}</span>`;
+    $("factPop").innerHTML = `<b>${esc(f.id)}</b> <span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span><br>${esc(f.statement)}<br><span class="small">출처: ${src(f)}<br>확인한 날: ${esc(f.checked)}</span>`;
     $("factPop").hidden = false; $("factPop").scrollIntoView({block: "nearest"});
   }));
   $("droppedBox").hidden = d.dropped.length === 0;
@@ -358,18 +370,30 @@ $("guideUpload").addEventListener("click", async () => {
 function renderFacts() {
   const q = $("factQ").value.trim().toLowerCase();
   const rows = S.facts.filter((f) => !q || (f.id + f.statement + f.source).toLowerCase().includes(q));
-  $("facts").innerHTML = rows.map((f) => `<tr><td class="small">${esc(f.id)}</td><td>${esc(f.statement)}</td><td><span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span></td><td class="small">${esc(f.source)}</td></tr>`).join("") || `<tr><td colspan="4" class="small">찾는 사실이 없습니다.</td></tr>`;
+  rows.sort((x, y) => (y.status === "pending") - (x.status === "pending"));
+  $("facts").innerHTML = rows.map((f) => `<tr><td class="small">${esc(f.id)}</td><td>${esc(f.statement)}${f.id.startsWith("DOC-") ? `<br>${f.status === "pending" ? `<button class="ghost" data-confirm="${esc(f.id)}">확정</button>` : ""}<button class="ghost" data-discard="${esc(f.id)}">지우기</button>` : ""}</td><td><span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span></td><td class="small">${src(f)}</td></tr>`).join("") || `<tr><td colspan="4" class="small">찾는 사실이 없습니다.</td></tr>`;
+  const c = {confirmed: 0, conflict: 0, claim: 0, pending: 0}; S.facts.forEach((f) => c[f.status]++);
+  $("factStat").innerHTML = `<div><span class="small">확정</span><b>${c.confirmed}</b></div><div><span class="small">확정 대기</span><b style="color:var(--warn)">${c.pending}</b></div><div><span class="small">확인 필요</span><b style="color:var(--bad)">${c.conflict}</b></div><div><span class="small">회사 주장</span><b style="color:var(--warn)">${c.claim}</b></div>`;
+  $("facts").querySelectorAll("[data-confirm]").forEach((b) => b.addEventListener("click", async () => { try { await api(`/api/facts/${b.dataset.confirm}/confirm`, {method: "POST"}); await loadFacts(); } catch (e) { fail(e); } }));
+  $("facts").querySelectorAll("[data-discard]").forEach((b) => b.addEventListener("click", async () => { try { await api(`/api/facts/${b.dataset.discard}`, {method: "DELETE"}); await loadFacts(); } catch (e) { fail(e); } }));
 }
+async function loadFacts() { S.facts = await api("/api/facts"); renderFacts(); }
+$("docUpload").addEventListener("click", () => {
+  const file = $("docFile").files[0];
+  if (!file) { fail(new Error("읽을 문서 파일을 먼저 골라 주세요.")); return; }
+  busy($("docUpload"), "AI가 문서를 읽는 중… (1~2분)", async () => {
+    const form = new FormData(); form.append("file", file);
+    const r = await api("/api/documents", {method: "POST", body: form});
+    $("docResult").innerHTML = `<div class="info">${r.pages_read}쪽을 읽어 사실 ${r.added.length}개를 '확정 대기'로 넣었습니다. 아래 표에서 확인하고 [확정]을 눌러 주세요.</div>` +
+      (r.pages_skipped ? `<div class="note">문서가 길어 뒤쪽 ${r.pages_skipped}쪽은 읽지 않았습니다. 나눠서 올려 주세요.</div>` : "") +
+      (r.rejected.length ? `<div class="note">AI가 제안했지만 넣지 않은 것 ${r.rejected.length}개<ul>${r.rejected.map((x) => `<li>${esc(x.text)} — ${esc(x.reason)}</li>`).join("")}</ul></div>` : "");
+    await loadFacts();
+  });
+});
 $("factQ").addEventListener("input", renderFacts);
 document.querySelectorAll(".steps button").forEach((b) => b.addEventListener("click", async () => {
   const n = Number(b.dataset.step);
-  if (n === 6 && !S.facts) {
-    try {
-      S.facts = await api("/api/facts"); const c = S.state.fact_counts;
-      $("factStat").innerHTML = `<div><span class="small">확정</span><b>${c.confirmed}</b></div><div><span class="small">확인 필요</span><b style="color:var(--bad)">${c.conflict}</b></div><div><span class="small">회사 주장</span><b style="color:var(--warn)">${c.claim}</b></div>`;
-      renderFacts();
-    } catch (e) { fail(e); return; }
-  }
+  if (n === 6) { try { await loadFacts(); } catch (e) { fail(e); return; } }
   show(n);
 }));
 init().catch(fail);

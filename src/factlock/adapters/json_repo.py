@@ -29,7 +29,12 @@ def fact_from_json(raw: dict[str, Any]) -> Fact:
         id=raw["id"],
         kind=raw["kind"],
         statement=raw["statement"],
-        source=Source(raw["source"]["where"], raw["source"]["checked"]),
+        source=Source(
+            raw["source"]["where"],
+            raw["source"]["checked"],
+            raw["source"].get("url", ""),
+            raw["source"].get("quote", ""),
+        ),
         status=FactStatus(raw.get("status", "confirmed")),
         values=tuple(_value(v) for v in raw.get("values", [])),
         anchors=tuple(raw.get("anchors", [])),

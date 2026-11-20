@@ -11,7 +11,8 @@ import anthropic
 from fastapi import FastAPI
 
 from factlock.adapters.ai_json import ClaudeApiJson, ClaudeCliJson, CodexCliJson, FirstAvailableJson
-from factlock.adapters.ai_steps import AiDraftWriter, AiMeaningReviewer, AiTargetPlanner
+from factlock.adapters.ai_steps import AiDraftWriter, AiFactExtractor, AiMeaningReviewer, AiTargetPlanner
+from factlock.adapters.extra_facts import JsonExtraFacts
 from factlock.adapters.json_repo import JsonCompanyData
 from factlock.adapters.sqlite_store import SqliteDraftStore
 from factlock.adapters.stored_writer import StoredDraftWriter
@@ -50,6 +51,8 @@ def build() -> FastAPI:
         SqliteDraftStore(Path(os.environ.get("FACTLOCK_DB", ROOT / "var" / "factlock.db"))),
         AiTargetPlanner(engine) if engine else None,
         AiMeaningReviewer(engine) if engine else None,
+        AiFactExtractor(engine) if engine else None,
+        JsonExtraFacts(Path(os.environ.get("FACTLOCK_EXTRA_FACTS", ROOT / "var" / "extra_facts.json"))),
     )
     return create_app(service, XlsxGuidelineReader(), engine.name if engine else "")
 

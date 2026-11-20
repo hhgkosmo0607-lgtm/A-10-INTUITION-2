@@ -5,7 +5,9 @@
     "statement": "홈페이지: www.tlinkcrm.com",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -14,7 +16,9 @@
     "statement": "블로그: https://blog.naver.com/mobilecrm",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -23,7 +27,9 @@
     "statement": "상담 문의: 1877-3836",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -32,7 +38,9 @@
     "statement": "상담 신청: https://www.tlinkcrm.com/center.php",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -41,7 +49,9 @@
     "statement": "㈜티링크앤주인닷컴은 2006년에 설립된 정보통신 전문 기업입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 회사소개",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/info.php",
+      "quote": ""
     }
   },
   {
@@ -50,7 +60,9 @@
     "statement": "등록 특허는 3건입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 회사소개",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/info.php",
+      "quote": ""
     },
     "anchors": [
       "특허"
@@ -62,7 +74,9 @@
     "statement": "도입 기업은 1,000여 개입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 첫 화면, 제안서",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/",
+      "quote": ""
     },
     "values": [
       {
@@ -82,7 +96,9 @@
     "statement": "인터넷전화 녹취 성공률은 99%입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php#:~:text=%EB%85%B9%EC%B7%A8%20%EC%84%B1%EA%B3%B5%EB%A5%A0",
+      "quote": "녹취 성공률"
     },
     "values": [
       {
@@ -101,7 +117,9 @@
     "statement": "최대 구축 규모는 한국전력 3,000석입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php",
+      "quote": ""
     },
     "values": [
       {
@@ -120,7 +138,9 @@
     "statement": "세종텔레콤에 1,000석 규모로 구축했습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "values": [
       {
@@ -142,7 +162,9 @@
     "statement": "여행박사에 300석 규모로 구축했습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "values": [
       {
@@ -160,7 +182,9 @@
     "statement": "학교 실적은 페이지에 따라 '150여 개'와 '200여 개'로 다릅니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 연혁, 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "status": "conflict",
     "values": [
@@ -183,7 +207,9 @@
     "statement": "공개된 종합리포트 예시(2026-08-03~08-09)의 한 주 상담은 115건입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 보고서 예시",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/management.php",
+      "quote": ""
     },
     "values": [
       {
@@ -203,7 +229,9 @@
     "statement": "가이드라인이 정한 제품 이름은 '티링크 비즈레코딩'입니다.",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     },
     "anchors": [
       "티링크 비즈레코딩",
@@ -216,7 +244,9 @@
     "statement": "티링크 AI 녹취는 인터넷전화·스마트폰·소프트폰 통화를 하나의 녹취 서버에 모으고 STT로 글로 바꿔 요약합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php",
+      "quote": ""
     },
     "anchors": [
       "티링크 AI 녹취",
@@ -229,7 +259,9 @@
     "statement": "티링크 모바일은 휴대폰 녹취 파일을 중앙 서버로 전송해 보관합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/mobile.php",
+      "quote": ""
     },
     "anchors": [
       "티링크 모바일",
@@ -248,7 +280,9 @@
     "statement": "티링크 고객관리(CRM)는 고객 정보와 상담·통화·문자·주문 이력을 한 화면에서 관리합니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     },
     "anchors": [
       "티링크 고객관리",
@@ -261,7 +295,9 @@
     "statement": "티링크 PC폰(TlinkPhone)은 전화기 없이 PC에 설치해 쓰는 전화기입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 PC폰",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/softphone.php",
+      "quote": ""
     },
     "anchors": [
       "PC폰",
@@ -275,7 +311,9 @@
     "statement": "종합리포트는 경영 분석 대시보드, 상담원 역량 분석, 인사고과 평가표, 신입사원 교육자료로 이루어집니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 경영분석 보고서, 제안서",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/report.php",
+      "quote": ""
     },
     "anchors": [
       "종합리포트",
@@ -288,7 +326,9 @@
     "statement": "티링크 비즈는 상담 현황판, 자동 배분, 콜백 예약, IVR, 녹취 연동을 묶은 콜센터 솔루션입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 비즈",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/bizsolution.php",
+      "quote": ""
     },
     "anchors": [
       "티링크 비즈 콜센터",
@@ -301,7 +341,9 @@
     "statement": "사무실 인터넷 전화기, 외근 중 스마트폰, 재택 소프트폰의 통화가 하나의 녹취 서버에 모입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php",
+      "quote": ""
     }
   },
   {
@@ -310,7 +352,9 @@
     "statement": "라우터와 패킷 미러링 스위치로 통화를 복제해 녹음하므로 기존 회선과 전화기를 바꾸지 않습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php",
+      "quote": ""
     },
     "anchors": [
       "미러링"
@@ -322,7 +366,9 @@
     "statement": "LG, SK, KT, 삼성SDS 회선을 모두 녹취할 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php",
+      "quote": ""
     }
   },
   {
@@ -331,7 +377,9 @@
     "statement": "통화가 끝나면 STT 문자변환, 한 줄 요약, 키워드, 화자별 대화가 기록됩니다.",
     "source": {
       "where": "제안서, 휴대폰 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -340,7 +388,9 @@
     "statement": "가이드라인은 통화 후 고객 요청사항과 후속 조치 내용이 자동으로 기록된다고 설명합니다.",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -349,7 +399,9 @@
     "statement": "통화 통계는 총 통화, 수신·발신, 평균 통화시간, 담당자별 통화량을 보여 줍니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -358,7 +410,9 @@
     "statement": "고객 화면에 그 고객의 상담·통화·문자·주문 이력이 쌓입니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -367,7 +421,9 @@
     "statement": "가이드라인은 담당자가 변경되어도 이전 상담 이력을 빠르게 확인할 수 있다고 설명합니다.",
     "source": {
       "where": "가이드라인",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -376,7 +432,9 @@
     "statement": "경영 분석 대시보드는 핵심 지표, 영업기회 현황, 미결 건 추적, 해지 위험 고객 조기경보, RED 알림을 보여 줍니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 보고서 예시",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/management.php",
+      "quote": ""
     }
   },
   {
@@ -385,7 +443,9 @@
     "statement": "상담원 역량 분석과 인사고과 평가표는 통화 원문을 근거로 하며, 표본이 부족하면 '평가 표본 부족'으로 표시합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 보고서 예시, 제안서",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/management.php",
+      "quote": ""
     }
   },
   {
@@ -394,7 +454,9 @@
     "statement": "신입사원 교육자료는 Best·Worst 사례집, 상황별 응대 플레이북, 롤플레잉 시나리오로 이루어집니다.",
     "source": {
       "where": "제안서",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -403,7 +465,9 @@
     "statement": "녹취파일은 AES256으로, 비밀번호는 SHA256으로 암호화합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com AI 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/recording.php",
+      "quote": ""
     }
   },
   {
@@ -412,7 +476,9 @@
     "statement": "권한은 상담원과 매니저로 나뉘고, 통계와 리포트는 매니저 이상만 볼 수 있습니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -421,7 +487,9 @@
     "statement": "일일 리포트는 통화·상담·매출 현황과 담당자별 실적을 요약합니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -430,7 +498,9 @@
     "statement": "종합리포트는 시작일과 종료일을 고르면 생성되고 PDF로 내려받을 수 있습니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -439,7 +509,9 @@
     "statement": "PC폰은 통화 중 음성을 글로 바꿔 보여 주고 외국어 통화를 통역합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 PC폰",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/softphone.php",
+      "quote": ""
     },
     "anchors": [
       "실시간 STT",
@@ -456,7 +528,9 @@
     "statement": "PC폰은 사무실, 재택, 외근 어디서나 같은 내선번호로 걸고 받습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 PC폰",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/softphone.php",
+      "quote": ""
     }
   },
   {
@@ -465,7 +539,9 @@
     "statement": "티링크 콜백은 모든 상담원이 통화 중일 때 고객을 대기시키고 통화 대기 목록을 보여 줍니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 콜백",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/callback.php",
+      "quote": ""
     }
   },
   {
@@ -474,7 +550,9 @@
     "statement": "학교용 녹취는 녹취서버 1대로 교내 인터넷전화 전체를 녹음하는 구매형 상품입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "anchors": [
       "학교용 녹취",
@@ -488,7 +566,9 @@
     "statement": "선생님마다 개인 계정이 주어져 본인 통화만 확인하고, 전체 확인은 관리자만 할 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "scope": "학교"
   },
@@ -498,7 +578,9 @@
     "statement": "학교용 녹취서버는 학내망에서만 접속할 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "scope": "학교"
   },
@@ -508,7 +590,9 @@
     "statement": "학교용 녹취는 통신사가 바뀌어도 기존 녹취파일을 보관합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "scope": "학교"
   },
@@ -518,7 +602,9 @@
     "statement": "누가 언제 어떤 녹음을 들었는지 재생 기록이 남습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "scope": "학교"
   },
@@ -528,7 +614,9 @@
     "statement": "녹음되는 전화기가 민원실에만 있어 민원 전화를 받으면 자리를 옮겨야 합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     }
   },
   {
@@ -537,7 +625,9 @@
     "statement": "일부 학부모의 악성 민원이 교육 활동 침해를 넘어 선생님 개인에게까지 이어지고 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     }
   },
   {
@@ -546,7 +636,9 @@
     "statement": "학교용 녹취서버는 교내 전화기 전체 기준 1,500,000원이며 구축 시 1회만 청구하고 월 사용요금이 없습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "values": [
       {
@@ -575,7 +667,9 @@
     "statement": "학교용 녹취의 실제 견적은 학교 환경에 따라 달라질 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 학교용 녹취",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/school.php",
+      "quote": ""
     },
     "markers": [
       "환경에 따라"
@@ -587,7 +681,9 @@
     "statement": "티링크 콜백은 부재중 통화를 모아서 확인할 수 있는 콜백 알리미 시스템입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 콜백",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/callback.php",
+      "quote": ""
     },
     "anchors": [
       "티링크 콜백",
@@ -600,7 +696,9 @@
     "statement": "상담원이 모두 통화 중이거나 자리를 비운 사이 걸려 온 전화는 그대로 끊깁니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 콜백 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433086858",
+      "quote": ""
     }
   },
   {
@@ -609,7 +707,9 @@
     "statement": "전화가 걸려 왔을 때 이 고객이 누구였는지, 지난번에 무슨 상담을 했는지 찾느라 응대가 늦어집니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 고객관리 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433059285",
+      "quote": ""
     }
   },
   {
@@ -618,7 +718,9 @@
     "statement": "전화가 오는 순간 상담원 PC 화면에 고객 정보가 팝업으로 뜹니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 고객관리 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433059285",
+      "quote": ""
     }
   },
   {
@@ -627,7 +729,9 @@
     "statement": "고객 화면에서 버튼을 누르면 연결된 단말기에서 바로 전화가 발신됩니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 고객관리 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433059285",
+      "quote": ""
     }
   },
   {
@@ -636,7 +740,9 @@
     "statement": "고객관리 화면에서 SMS·LMS·MMS 문자를 보내고, 엑셀로 수신자를 올려 대량 발송할 수 있습니다.",
     "source": {
       "where": "CRM 매뉴얼",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -645,7 +751,9 @@
     "statement": "일반전화(02, 031, 070 등)로 걸면 고객이 잘 받지 않습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/mobile.php",
+      "quote": ""
     }
   },
   {
@@ -654,7 +762,9 @@
     "statement": "발신번호 변작 없이 010 번호를 그대로 사용해 발신합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/mobile.php",
+      "quote": ""
     }
   },
   {
@@ -663,7 +773,9 @@
     "statement": "명함을 사진으로 찍어 등록하고 관리할 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/mobile.php",
+      "quote": ""
     }
   },
   {
@@ -672,7 +784,9 @@
     "statement": "모바일 앱에서 고객을 직접 만나 나눈 대화도 녹음(대면 녹취)할 수 있습니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 모바일 CRM 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433241171",
+      "quote": ""
     }
   },
   {
@@ -681,7 +795,9 @@
     "statement": "티링크온은 LTE·Wi-Fi 네트워크 기반의 업무용 PTT 무전 솔루션입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 온",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/tlinkon.php",
+      "quote": ""
     },
     "anchors": [
       "티링크온",
@@ -694,7 +810,9 @@
     "statement": "티링크온은 인터넷망을 사용해 무전 주파수 반경의 제약 없이 통신합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 온",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/tlinkon.php",
+      "quote": ""
     }
   },
   {
@@ -703,7 +821,9 @@
     "statement": "티링크온의 AI 실시간 통역은 부가서비스이며 30개국 이상의 언어를 지원합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 온",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/tlinkon.php",
+      "quote": ""
     },
     "values": [
       {
@@ -721,7 +841,9 @@
     "statement": "무전 통화와 통역 세션이 서버에 자동으로 기록되고 요약됩니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 온",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/tlinkon.php",
+      "quote": ""
     }
   },
   {
@@ -730,7 +852,9 @@
     "statement": "버튼을 3초간 누르면 회사 전체 사용자에게 긴급알림이 전파됩니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 온",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/tlinkon.php",
+      "quote": ""
     }
   },
   {
@@ -739,7 +863,9 @@
     "statement": "외국인 근로자가 함께 일하는 현장에서는 작업 지시를 여러 언어로 전달해야 합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 온",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/tlinkon.php",
+      "quote": ""
     }
   },
   {
@@ -748,7 +874,9 @@
     "statement": "휴대폰으로 통화하면 녹음이 직원 개인 폰에만 남고, 누가 어떤 고객과 무슨 이야기를 했는지 회사에서 알 수 없습니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 모바일 CRM 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433241171",
+      "quote": ""
     }
   },
   {
@@ -757,7 +885,9 @@
     "statement": "영업직원은 통화 후 CRM에 기록을 남기지 않고, 회의록은 불완전하거나 미작성 상태로 남습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 첫 화면",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/",
+      "quote": ""
     }
   },
   {
@@ -766,7 +896,9 @@
     "statement": "고객이 한 말을 확인하려면 녹음 파일을 하나하나 찾아 들어야 합니다.",
     "source": {
       "where": "공식 블로그 2026-09-30 AI 녹취 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224427082392",
+      "quote": ""
     }
   },
   {
@@ -775,7 +907,9 @@
     "statement": "재택근무에서는 개인 휴대폰으로 전화를 받게 되고 고객에게 개인 번호가 남습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 PC폰",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/softphone.php",
+      "quote": ""
     }
   },
   {
@@ -784,7 +918,9 @@
     "statement": "재택근무자가 늘면 직원마다 전화기를 새로 놓아야 하는지가 고민입니다.",
     "source": {
       "where": "공식 블로그 2026-10-06 PC폰 글",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://blog.naver.com/mobilecrm/224433250722",
+      "quote": ""
     }
   },
   {
@@ -793,7 +929,9 @@
     "statement": "통화가 끝나면, 보고서가 시작됩니다.",
     "source": {
       "where": "제안서",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "",
+      "quote": ""
     }
   },
   {
@@ -802,7 +940,9 @@
     "statement": "기록은 AI에게, 성장은 당신에게.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 첫 화면",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/",
+      "quote": ""
     }
   },
   {
@@ -811,7 +951,9 @@
     "statement": "상담원을 감시하는 도구가 아니라, 경영자가 팀 전체를 한눈에 읽고 다음 결정을 내리게 돕는 도구입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 첫 화면",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/",
+      "quote": ""
     }
   },
   {
@@ -820,7 +962,9 @@
     "statement": "A타입(고객관리 + 녹취 + 문자변환·요약 + 일일보고서)은 상담원당 월 30,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -853,7 +997,9 @@
     "statement": "B타입(고객관리 + 녹취)은 상담원당 월 20,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -886,7 +1032,9 @@
     "statement": "C타입(녹취)은 상담원당 월 10,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -919,7 +1067,9 @@
     "statement": "A·B·C 타입의 최초 설정비는 300,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -942,7 +1092,9 @@
     "statement": "종합리포트는 월 100,000원이며 매월 3회까지 생성할 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -972,7 +1124,9 @@
     "statement": "IVR(대표번호 안내멘트)은 월 20,000원, 설정비 50,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -1004,7 +1158,9 @@
     "statement": "콜백은 월 20,000원, 설정비 50,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "values": [
       {
@@ -1036,7 +1192,9 @@
     "statement": "티링크 모바일 이용료는 1 USER 20,000원으로 안내되어 있으나, A·B·C 타입 요금과의 관계는 자료에 없습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/mobile.php#:~:text=1%20USER%2020%2C000%EC%9B%90",
+      "quote": "1 USER 20,000원"
     },
     "values": [
       {
@@ -1055,7 +1213,9 @@
     "statement": "가격은 부가세 별도입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "markers": [
       "부가세 별도",
@@ -1068,7 +1228,9 @@
     "statement": "표시된 금액은 예시 견적이며 정확한 비용은 상담 후 확정됩니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "markers": [
       "예시 견적",
@@ -1082,7 +1244,9 @@
     "statement": "A·B·C 타입은 상담원 최소 3명부터입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php#:~:text=%EC%B5%9C%EC%86%8C%203%EB%AA%85",
+      "quote": "최소 3명"
     },
     "markers": [
       "최소 3명"
@@ -1094,7 +1258,9 @@
     "statement": "종합리포트는 A타입을 선택한 경우에만 이용할 수 있습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 상담신청 페이지(견적 계산기)",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/center.php",
+      "quote": ""
     },
     "markers": [
       "A타입"
@@ -1106,7 +1272,9 @@
     "statement": "티링크 모바일은 안드로이드 10 이상에서 사용할 수 있고 아이폰은 사용할 수 없습니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/mobile.php#:~:text=%EC%95%84%EC%9D%B4%ED%8F%B0%20%EC%82%AC%EC%9A%A9%20%EB%B6%88%EA%B0%80",
+      "quote": "아이폰 사용 불가"
     },
     "markers": [
       "아이폰"
@@ -1118,7 +1286,9 @@
     "statement": "PC폰의 실시간 텍스트 변환과 통화번역은 별도 부가서비스입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 PC폰",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/softphone.php#:~:text=%EB%B3%84%EB%8F%84%20%EB%B6%80%EA%B0%80%EC%84%9C%EB%B9%84%EC%8A%A4%20%EC%8B%A0%EC%B2%AD%EC%9D%B4%20%ED%95%84%EC%9A%94%ED%95%A9%EB%8B%88%EB%8B%A4",
+      "quote": "별도 부가서비스 신청이 필요합니다"
     },
     "markers": [
       "부가서비스"
@@ -1130,7 +1300,9 @@
     "statement": "회사는 인터넷전화를 '업계 최저 기본요금'이라고 설명합니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 인터넷전화",
-      "checked": "2026-11-20"
+      "checked": "2026-11-20",
+      "url": "https://www.tlinkcrm.com/ipphone.php",
+      "quote": ""
     },
     "status": "claim",
     "anchors": [

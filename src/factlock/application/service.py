@@ -1,10 +1,11 @@
 """Use cases: target plan, bundle and quote, draft with fact lock, review. Depends on domain and ports only."""
 
+import datetime
 import hashlib
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
-from factlock.domain.extract import contains
+from factlock.domain.extract import contains, extract_values, is_checked
 from factlock.domain.lock import lock_draft, render_body
 from factlock.domain.models import (
     Draft,
@@ -18,15 +19,28 @@ from factlock.domain.models import (
     Quote,
     ReviewReport,
     RuleResult,
+    Source,
     Target,
     Verdict,
 )
 from factlock.domain.quote import build_quote
 from factlock.domain.review import review
-from factlock.ports import AiError, DraftStore, DraftWriter, DraftWriterError, MeaningReviewer, TargetPlanner
+from factlock.ports import (
+    AiError,
+    DraftStore,
+    DraftWriter,
+    DraftWriterError,
+    ExtraFactStore,
+    FactExtractor,
+    MeaningReviewer,
+    TargetPlanner,
+)
 
 USABLE_KINDS_FOR_WRITING = ("product", "feature", "number", "price", "condition", "pain", "phrase", "company")
 MAX_PRODUCTS = 4
+DOC_KINDS = ("product", "feature", "number", "price", "condition", "company")
+CHUNK_CHARS = 12_000
+MAX_CHUNKS = 5
 
 
 @dataclass(frozen=True)
@@ -49,7 +63,19 @@ class DraftResult:
     fallback_code: str  # empty when the live writer answered
 
 
+@dataclass(frozen=True)
+class Ingested:
+    added: tuple[Fact, ...]
+    rejected: tuple[Dropped, ...]  # what the AI proposed and why it was not kept
+    pages_read: int
+    pages_skipped: int
+
+
 class UnknownTarget(Exception):
+    pass
+
+
+class UnknownFact(Exception):
     pass
 
 
@@ -72,9 +98,14 @@ class FactLockService:
         store: DraftStore,
         planner: TargetPlanner | None = None,
         reviewer: MeaningReviewer | None = None,
+        extractor: FactExtractor | None = None,
+        extra_store: ExtraFactStore | None = None,
     ) -> None:
-        self._facts = list(facts)
-        self._by_id = {fact.id: fact for fact in facts}
+        self._extra_store = extra_store
+        self._extractor = extractor
+        extra = extra_store.load() if extra_store else []
+        self._facts = [*facts, *(f for f in extra if f.id not in {x.id for x in facts})]
+        self._by_id = {fact.id: fact for fact in self._facts}
         self._targets = {target.id: target for target in targets}
         self._reasons: dict[str, str] = {}
         self.guideline = guideline
@@ -107,10 +138,89 @@ class FactLockService:
         picked: dict[str, Fact] = {}
         for fact_id in ids:
             fact = self._by_id.get(fact_id)
-            if fact is None or fact.status is FactStatus.CONFLICT or (kind and fact.kind != kind):
+            if (
+                fact is None
+                or fact.status not in (FactStatus.CONFIRMED, FactStatus.CLAIM)
+                or (kind and fact.kind != kind)
+            ):
                 continue
             picked[fact.id] = fact
         return tuple(picked.values())
+
+    def _replace_fact(self, fact: Fact | None, fact_id: str) -> None:
+        self._facts = [f for f in self._facts if f.id != fact_id]
+        if fact is not None:
+            self._facts.append(fact)
+        self._by_id = {f.id: f for f in self._facts}
+        if self._extra_store is not None:
+            self._extra_store.save([f for f in self._facts if f.id.startswith("DOC-")])
+
+    def ingest_document(self, filename: str, pages: Sequence[tuple[str, str]]) -> Ingested:
+        """Ask the AI for facts in a document; keep only those whose quote is really in the text.
+
+        Kept facts are 'pending': they cannot be used in copy until a person confirms them.
+        """
+        if self._extractor is None:
+            raise Unavailable("ai_not_configured")
+        chunks: list[list[tuple[str, str]]] = [[]]
+        for locator, text in pages:
+            if chunks[-1] and sum(len(t) for _, t in chunks[-1]) + len(text) > CHUNK_CHARS:
+                chunks.append([])
+            chunks[-1].append((locator, text[:CHUNK_CHARS]))
+        used = chunks[:MAX_CHUNKS]
+        pages_read = sum(len(chunk) for chunk in used)
+        by_locator = dict(pages)
+        added: list[Fact] = []
+        rejected: list[Dropped] = []
+        today = datetime.date.today().isoformat()
+        name = filename.rsplit("/", 1)[-1][:80]
+        for chunk in used:
+            try:
+                proposals = self._extractor.extract(chunk)
+            except AiError as error:
+                if not added and not rejected:
+                    raise Unavailable(error.code) from None
+                break
+            for item in proposals:
+                statement, quote = item["statement"].strip(), item["quote"].strip()
+                page_text = by_locator.get(item["locator"], "")
+                if not statement or len(quote) < 4 or item["kind"] not in DOC_KINDS:
+                    rejected.append(Dropped(statement or quote, "문장이나 원문 인용이 비어 있습니다."))
+                    continue
+                if not contains(page_text, quote):
+                    rejected.append(Dropped(statement, "인용한 원문을 문서에서 찾지 못했습니다."))
+                    continue
+                values = tuple(dict.fromkeys(f.value for f in extract_values(statement) if is_checked(f.value)))
+                quoted = {f.value for f in extract_values(quote)}
+                if any(value not in quoted for value in values):
+                    rejected.append(Dropped(statement, "문장의 숫자가 인용한 원문에 없습니다."))
+                    continue
+                fact_id = "DOC-" + hashlib.sha256(statement.encode()).hexdigest()[:8].upper()
+                if fact_id in self._by_id or any(f.id == fact_id for f in added):
+                    continue
+                anchors = tuple(w for w in item["subject_words"] if len(w) >= 2 and contains(statement, w))[:2]
+                source = Source(f"{name} {item['locator']}", today, "", quote[:300])
+                added.append(
+                    Fact(
+                        fact_id, item["kind"], statement, source, FactStatus.PENDING, values, anchors if values else ()
+                    )
+                )
+        for fact in added:
+            self._replace_fact(fact, fact.id)
+        return Ingested(tuple(added), tuple(rejected), pages_read, len(pages) - pages_read)
+
+    def confirm_fact(self, fact_id: str) -> Fact:
+        fact = self._by_id.get(fact_id)
+        if fact is None or not fact_id.startswith("DOC-"):
+            raise UnknownFact(fact_id)
+        confirmed = replace(fact, status=FactStatus.CONFIRMED)
+        self._replace_fact(confirmed, fact_id)
+        return confirmed
+
+    def discard_fact(self, fact_id: str) -> None:
+        if fact_id not in self._by_id or not fact_id.startswith("DOC-"):
+            raise UnknownFact(fact_id)
+        self._replace_fact(None, fact_id)
 
     def plan_target(self, description: str) -> Target:
         """Ask the AI which facts fit a free-text customer; keep only ids that exist in the fact list."""
@@ -168,7 +278,7 @@ class FactLockService:
         return tuple(
             fact
             for fact in self._facts
-            if fact.status is not FactStatus.CONFLICT and fact.kind in USABLE_KINDS_FOR_WRITING
+            if fact.status in (FactStatus.CONFIRMED, FactStatus.CLAIM) and fact.kind in USABLE_KINDS_FOR_WRITING
         )
 
     def make_draft(self, target_id: str, live: bool = True) -> DraftResult:

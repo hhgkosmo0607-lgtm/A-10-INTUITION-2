@@ -201,3 +201,11 @@ def test_draft_for_target_without_stored_draft_is_503(tmp_path: Path) -> None:
     response = make_client(tmp_path, None).post("/api/drafts", json={"target_id": "school"})
     assert response.status_code == 503
     assert response.json()["detail"]["code"] == "live_writer_not_configured"
+
+
+def test_facts_link_only_to_public_pages(tmp_path: Path) -> None:
+    facts = {f["id"]: f for f in make_client(tmp_path, None).get("/api/facts").json()}
+    assert facts["COND-ANDROID"]["url"].startswith("https://www.tlinkcrm.com/mobile.php#:~:text=")
+    assert facts["COND-ANDROID"]["quote"] == "아이폰 사용 불가"
+    assert facts["PROD-NAME"]["url"] == ""  # the guideline is a received file, not an online page
+    assert all(f["url"] == "" or f["url"].startswith("https://") for f in facts.values())

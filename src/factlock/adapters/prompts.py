@@ -83,7 +83,7 @@ def build_prompt(request: DraftRequest) -> str:
             **({"scope": fact.scope} if fact.scope else {}),
         }
         for fact in request.facts
-        if fact.status is not FactStatus.CONFLICT
+        if fact.status in (FactStatus.CONFIRMED, FactStatus.CLAIM)
     ]
     applies = not request.guideline.targets or request.target.id in request.guideline.targets
     payload = {
@@ -180,7 +180,7 @@ def fact_table(facts: Sequence[Fact]) -> list[dict[str, str]]:
     return [
         {"id": f.id, "kind": f.kind, "statement": f.statement, "status": f.status.value}
         for f in facts
-        if f.status is not FactStatus.CONFLICT
+        if f.status in (FactStatus.CONFIRMED, FactStatus.CLAIM)
     ]
 
 
@@ -192,3 +192,53 @@ def plan_prompt(description: str, facts: Sequence[Fact]) -> str:
 def review_prompt(title: str, body: str, facts: Sequence[Fact]) -> str:
     payload = {"facts": fact_table(facts), "text": {"title": title, "body": body}}
     return "Check this text against the facts.\n\n" + json.dumps(payload, ensure_ascii=False, indent=1)
+
+
+EXTRACT_SYSTEM = """You read a company's internal documents and list the facts a marketer could later use
+in advertising copy. A rule engine checks every fact you return against the document text and discards
+any fact whose quote is not found there, so quoting exactly is what makes your work usable.
+
+For each fact
+- "statement": one plain Korean sentence stating the fact, self-contained (name the product or subject).
+  Keep numbers, prices and names exactly as the document gives them.
+- "quote": the exact words copied from the document that support it, a short continuous span from one
+  page. Do not paraphrase, join separate spans or fix typos in the quote.
+- "locator": the locator of the page the quote is on, exactly as given.
+- "kind": product (what a product is), feature (what it does), number (a count, rate or track record),
+  price (a price or fee), condition (a limit or requirement customers must be told), company.
+- "subject_words": one or two words from the statement that name what the fact is about.
+
+Leave out greetings, navigation text, slogans, opinions, instructions to staff, and anything about named
+private individuals (names, phone numbers, emails of people). At most 15 facts per request, most useful
+for advertising first. Return an empty list if the pages hold nothing usable."""
+
+EXTRACT_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "facts": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "statement": {"type": "string"},
+                    "quote": {"type": "string"},
+                    "locator": {"type": "string"},
+                    "kind": {
+                        "type": "string",
+                        "enum": ["product", "feature", "number", "price", "condition", "company"],
+                    },
+                    "subject_words": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["statement", "quote", "locator", "kind", "subject_words"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["facts"],
+    "additionalProperties": False,
+}
+
+
+def extract_prompt(pages: Sequence[tuple[str, str]]) -> str:
+    payload = [{"locator": locator, "text": text} for locator, text in pages]
+    return "List the usable facts in these pages.\n\n" + json.dumps(payload, ensure_ascii=False, indent=1)

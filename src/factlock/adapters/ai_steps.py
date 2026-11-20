@@ -65,3 +65,25 @@ class AiMeaningReviewer:
             for i in raw
             if isinstance(i, dict)
         ]
+
+
+class AiFactExtractor:
+    def __init__(self, model: JsonModel) -> None:
+        self._model = model
+
+    def extract(self, pages: Sequence[tuple[str, str]]) -> list[dict[str, Any]]:
+        answer = self._model.ask(prompts.EXTRACT_SYSTEM, prompts.extract_prompt(pages), prompts.EXTRACT_SCHEMA)
+        raw = answer.get("facts")
+        if not isinstance(raw, list):
+            raise AiError("ai_bad_output")
+        return [
+            {
+                "statement": str(i.get("statement", "")),
+                "quote": str(i.get("quote", "")),
+                "locator": str(i.get("locator", "")),
+                "kind": str(i.get("kind", "")),
+                "subject_words": _strings(i.get("subject_words")),
+            }
+            for i in raw
+            if isinstance(i, dict)
+        ]

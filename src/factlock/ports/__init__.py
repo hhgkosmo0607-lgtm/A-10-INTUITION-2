@@ -82,3 +82,23 @@ class MeaningReviewer(Protocol):
     """Finds meaning-level problems rules cannot see. Raises AiError when unavailable."""
 
     def review(self, title: str, body: str, facts: Sequence[Fact]) -> list[dict[str, str]]: ...
+
+
+class DocumentError(Exception):
+    """An uploaded document could not be read. Carries a fixed code, never the file content."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+class FactExtractor(Protocol):
+    """Proposes facts from document text, each with the exact supporting quote. Raises AiError."""
+
+    def extract(self, pages: Sequence[tuple[str, str]]) -> list[dict[str, Any]]: ...
+
+
+class ExtraFactStore(Protocol):
+    def load(self) -> list[Fact]: ...
+
+    def save(self, facts: list[Fact]) -> None: ...
