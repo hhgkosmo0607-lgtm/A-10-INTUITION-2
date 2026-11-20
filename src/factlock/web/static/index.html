@@ -170,16 +170,20 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <div class="row"><label for="agents">상담원 수</label><input type="number" id="agents" min="1" max="10000" value="5" style="width:100px"><button class="ghost" id="recalc">재계산</button></div>
     <div id="quote"></div>
     </div>
-    <details id="recvBox" style="margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:10px 14px">
-      <summary style="cursor:pointer;font-weight:700">체험단 글 검수 <span class="small" style="font-weight:400">· 받은 글이 위 내용과 맞는지 확인</span></summary>
-      <p class="sub" style="margin-top:8px">체험단이 써 온 글이나 이미 올린 글을 붙여 넣으면, 이 타깃의 내용·조건과 가이드라인을 기준으로 검사합니다.</p>
+    <h3>체험단 글 검수</h3>
+    <div class="row">
+      <div class="seg" role="group" aria-label="체험단 글 검수 추가 여부"><button type="button" id="recvOff" aria-pressed="true">미추가</button><button type="button" id="recvOn" aria-pressed="false">추가</button></div>
+      <span class="small">체험단이 써 온 글이나 이미 올린 글이 위 내용과 맞는지 확인할 때 추가합니다.</span>
+    </div>
+    <div id="recvBox" hidden style="margin-top:10px">
+      <p class="sub">글을 붙여 넣으면 이 타깃의 내용·고지 사항과 가이드라인을 기준으로 검사합니다.</p>
       <label for="pTitle" class="small">제목</label>
       <input type="text" id="pTitle" style="width:100%;margin-bottom:8px">
       <label for="pBody" class="small">본문</label>
       <textarea id="pBody" style="min-height:160px"></textarea>
       <div class="row" style="margin:10px 0"><button class="go" id="pCheck">검수</button><label class="small"><input type="checkbox" id="ai5"> AI 의미 검수 포함</label></div>
       <div id="report5"></div>
-    </details>
+    </div>
     <h3>결과물 생성</h3>
     <p class="small">블로그 글은 네이버·티스토리용 글 한 편, 인스타 게시글은 넘겨 보는 카드와 게시물 문구, 해시태그(5개 이내)입니다.</p>
     <div class="row" style="margin-top:8px"><button class="go" id="makeBlogBtn">블로그 글 생성</button><button class="go" id="makeCarBtn">인스타 게시글 생성</button><button class="ghost" id="makeBoth">둘 다 생성</button></div>
@@ -262,8 +266,9 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <div id="docResult"></div>
     <table style="margin-top:8px"><thead><tr><th>문서</th><th>쪽수</th><th>뽑은 사실</th><th>넣은 날</th><th></th></tr></thead><tbody id="docList"></tbody></table>
     <h3 style="margin-top:26px">가이드라인</h3>
-    <p class="sub">글이 지켜야 할 규칙(필수 키워드, 강조 항목, 하단 정보)을 적은 엑셀입니다. 사실을 뽑는 사내 문서와는 쓰임이 다릅니다. 올리지 않으면 저장된 티링크 가이드라인을 씁니다.</p>
-    <div class="row"><input type="file" id="guideFile" accept=".xlsx" aria-label="가이드라인 엑셀 파일"><button class="go" id="guideUpload">가이드라인 교체</button></div>
+    <p class="sub">글이 지켜야 할 규칙(필수 키워드, 강조 항목, 하단 정보)을 적은 엑셀입니다. 넣을 때마다 쌓이고, 적용에 체크한 것들이 합쳐져 검수 기준이 됩니다.</p>
+    <div class="row"><input type="file" id="guideFile" accept=".xlsx" aria-label="가이드라인 엑셀 파일"><button class="go" id="guideUpload">가이드라인 추가</button></div>
+    <table style="margin-top:8px"><thead><tr><th>적용</th><th>가이드라인</th><th>필수 키워드</th><th>강조 항목</th><th></th></tr></thead><tbody id="guideList"></tbody></table>
     <p class="small" id="guideSummary2"></p>
     <h3 style="margin-top:26px">홍보 이미지</h3>
     <p class="sub">실제 서비스 화면, 제품 사진입니다. 인스타 카드의 배경과 블로그 글의 소제목 아래에 골라 넣습니다.</p>
@@ -542,6 +547,11 @@ function setPrice(on) {
   $("priceNote").textContent = on ? "가격과 함께 부가세 별도·예시 견적 같은 조건이 글에 들어갑니다." : "광고 글에는 보통 가격을 넣지 않습니다.";
 }
 $("priceOn").addEventListener("click", () => setPrice(true)); $("priceOff").addEventListener("click", () => setPrice(false));
+function setRecv(on) {
+  $("recvBox").hidden = !on;
+  $("recvOn").setAttribute("aria-pressed", String(on)); $("recvOff").setAttribute("aria-pressed", String(!on));
+}
+$("recvOn").addEventListener("click", () => setRecv(true)); $("recvOff").addEventListener("click", () => setRecv(false));
 function wrapLines(ctx, text, maxWidth) {
   const out = [];
   for (const para of String(text).split("\n")) {
@@ -755,11 +765,16 @@ $("pCheck").addEventListener("click", () => {
   if (!$("pBody").value.trim()) { fail(new Error("검수할 글을 붙여 넣어 주세요.")); return; }
   busy($("pCheck"), "검수하는 중…", () => check($("pTitle"), $("pBody"), S.target, $("report5"), $("ai5").checked));
 });
-$("guideUpload").addEventListener("click", async () => {
+function renderGuides(data) {
+  renderGuide(data.applied); S.state.guideline = data.applied;
+  $("guideList").innerHTML = data.entries.map((e) => `<tr><td><input type="checkbox" data-g="${esc(e.id)}" ${e.enabled ? "checked" : ""} aria-label="${esc(e.name)} 적용"></td><td>${esc(e.name)}</td><td class="small">${esc(e.keywords.join(", ")) || "없음"}</td><td>${e.emphasis}개</td><td>${e.builtin ? "" : `<button class="ghost" data-gd="${esc(e.id)}">삭제</button>`}</td></tr>`).join("");
+  $("guideList").querySelectorAll("[data-g]").forEach((c) => c.addEventListener("change", async () => { try { renderGuides(await api(`/api/guidelines/${c.dataset.g}/switch?enabled=${c.checked}`, {method: "POST"})); } catch (e) { fail(e); } }));
+  $("guideList").querySelectorAll("[data-gd]").forEach((b) => b.addEventListener("click", async () => { try { renderGuides(await api(`/api/guidelines/${b.dataset.gd}`, {method: "DELETE"})); } catch (e) { fail(e); } }));
+}
+$("guideUpload").addEventListener("click", () => {
   const file = $("guideFile").files[0];
-  if (!file) { fail(new Error("올릴 엑셀 파일을 먼저 골라 주세요.")); return; }
-  const form = new FormData(); form.append("file", file);
-  try { renderGuide(await api("/api/guideline", {method: "POST", body: form})); } catch (e) { fail(e); }
+  if (!file) { fail(new Error("넣을 엑셀 파일을 먼저 골라 주세요.")); return; }
+  busy($("guideUpload"), "추가 중…", async () => { const form = new FormData(); form.append("file", file); renderGuides(await api("/api/guidelines", {method: "POST", body: form})); $("guideFile").value = ""; });
 });
 function renderFacts() {
   const q = $("factQ").value.trim().toLowerCase();
@@ -798,7 +813,7 @@ $("factQ").addEventListener("input", renderFacts);
 document.querySelectorAll(".steps button").forEach((b) => b.addEventListener("click", async () => {
   const n = Number(b.dataset.step);
   if (n === 6) { try { await loadFacts(); } catch (e) { fail(e); return; } }
-  if (n === 7) { try { await loadAssets(); renderAssets(); await loadDocs(); } catch (e) { fail(e); return; } }
+  if (n === 7) { try { await loadAssets(); renderAssets(); await loadDocs(); renderGuides(await api("/api/guidelines")); } catch (e) { fail(e); return; } }
   show(n);
 }));
 init().catch(fail);

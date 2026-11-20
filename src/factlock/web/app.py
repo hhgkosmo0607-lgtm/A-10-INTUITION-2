@@ -15,6 +15,7 @@ from factlock.application.service import (
     Unavailable,
     UnknownDocument,
     UnknownFact,
+    UnknownGuideline,
     UnknownTarget,
 )
 from factlock.domain.models import Asset, Block, Carousel, Fact, ReviewReport, Slide
@@ -265,17 +266,52 @@ def create_app(
             raise HTTPException(503, {"code": error.code, "message": ai_message(error.code)}) from None
         return {"id": target.id, "name": target.name, "status": target.status}
 
-    @app.post("/api/guideline")
-    async def guideline(file: UploadFile = File(...)) -> dict[str, Any]:  # noqa: B008
+    def guideline_list() -> dict[str, Any]:
+        entries = [
+            {
+                "id": e.id,
+                "name": e.name,
+                "enabled": e.enabled,
+                "builtin": e.builtin,
+                "keywords": list(e.guideline.required_keywords),
+                "emphasis": len(e.guideline.emphasis),
+            }
+            for e in service.guidelines()
+        ]
+        return {"entries": entries, "applied": guideline_view()}
+
+    @app.get("/api/guidelines")
+    def guidelines() -> dict[str, Any]:
+        return guideline_list()
+
+    @app.post("/api/guidelines")
+    async def add_guideline(file: UploadFile = File(...)) -> dict[str, Any]:  # noqa: B008
         data = await file.read(MAX_UPLOAD + 1)
         try:
             if len(data) > MAX_UPLOAD:
                 raise GuidelineError("guideline_too_large")
-            service.use_guideline(reader.read(data))
+            service.add_guideline(file.filename or "가이드라인", reader.read(data))
         except GuidelineError as error:
             message = GUIDELINE_MESSAGES.get(error.code, "가이드라인을 읽지 못했습니다.")
             raise HTTPException(400, {"code": error.code, "message": message}) from None
-        return guideline_view()
+        return guideline_list()
+
+    @app.post("/api/guidelines/{entry_id}/switch")
+    def switch_guideline(entry_id: str, enabled: bool) -> dict[str, Any]:
+        try:
+            service.switch_guideline(entry_id, enabled)
+        except UnknownGuideline:
+            raise HTTPException(404, {"code": "unknown_guideline", "message": "없는 가이드라인입니다."}) from None
+        return guideline_list()
+
+    @app.delete("/api/guidelines/{entry_id}")
+    def remove_guideline(entry_id: str) -> dict[str, Any]:
+        try:
+            service.remove_guideline(entry_id)
+        except UnknownGuideline:
+            message = "기본 가이드라인은 지울 수 없습니다. 적용을 끌 수는 있습니다."
+            raise HTTPException(404, {"code": "unknown_guideline", "message": message}) from None
+        return guideline_list()
 
     @app.post("/api/drafts")
     def drafts(body: DraftIn) -> dict[str, Any]:

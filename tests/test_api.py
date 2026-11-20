@@ -120,24 +120,44 @@ def test_review_flags_wrong_setup_fee(tmp_path: Path) -> None:
     assert data["passed"] is False
 
 
-def test_guideline_upload_keeps_confirmed_terms(tmp_path: Path) -> None:
+def guideline_file(*rows: tuple[str, str]) -> bytes:
     book = Workbook()
     sheet = book.active
     assert sheet is not None
-    sheet.append(["필수", "알파, 베타"])
-    sheet.append(["강조내용", "1. 첫째 항목\n\n2. 둘째 항목\n\n홈페이지(www.example.com)"])
+    for row in rows:
+        sheet.append(list(row))
     buffer = io.BytesIO()
     book.save(buffer)
+    return buffer.getvalue()
+
+
+def test_guidelines_pile_up_and_only_switched_on_ones_apply(tmp_path: Path) -> None:
     client = make_client(tmp_path, None)
-    response = client.post("/api/guideline", files={"file": ("g.xlsx", buffer.getvalue())})
-    data = response.json()
-    assert data["required_keywords"] == ["알파", "베타"]
-    assert len(data["emphasis"]) == 2
-    assert data["emphasis"][0]["terms"]  # terms for item 1 carried over from the stored guideline
+    first = guideline_file(
+        ("필수", "알파, 베타"), ("강조내용", "1. 첫째 항목\n\n2. 둘째 항목\n\n홈페이지(www.example.com)")
+    )
+    data = client.post("/api/guidelines", files={"file": ("캠페인A.xlsx", first)}).json()
+    assert [e["name"] for e in data["entries"]] == ["기본 가이드라인", "캠페인A.xlsx"]
+    applied = data["applied"]
+    assert applied["required_keywords"] == [
+        "통화요약",
+        "콜센터 프로그램",
+        "업무자동화",
+        "알파",
+        "베타",
+    ]  # added, not replaced
+    assert len(applied["emphasis"]) == 13 and "example.com" in applied["footer"]
+
+    added = data["entries"][1]["id"]
+    off = client.post("/api/guidelines/builtin/switch?enabled=false").json()
+    assert off["applied"]["required_keywords"] == ["알파", "베타"] and len(off["applied"]["emphasis"]) == 2
+    assert client.delete("/api/guidelines/builtin").status_code == 404  # the built-in one can only be switched off
+    gone = client.delete(f"/api/guidelines/{added}").json()
+    assert [e["id"] for e in gone["entries"]] == ["builtin"] and gone["applied"]["required_keywords"] == []
 
 
 def test_bad_guideline_returns_fixed_code(tmp_path: Path) -> None:
-    response = make_client(tmp_path, None).post("/api/guideline", files={"file": ("g.xlsx", b"not a workbook")})
+    response = make_client(tmp_path, None).post("/api/guidelines", files={"file": ("g.xlsx", b"not a workbook")})
     assert response.status_code == 400
     assert response.json()["detail"]["code"] == "guideline_unreadable"
     assert "not a workbook" not in response.text

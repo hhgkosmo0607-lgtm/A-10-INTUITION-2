@@ -85,6 +85,17 @@ class Guideline:
 
 
 @dataclass(frozen=True)
+class GuidelineEntry:
+    """One guideline kept in the library, and whether it is applied."""
+
+    id: str
+    name: str
+    guideline: Guideline
+    enabled: bool = True
+    builtin: bool = False
+
+
+@dataclass(frozen=True)
 class Block:
     """One piece of a draft: an AI sentence, a slot a person must fill, or the rule-made footer."""
 

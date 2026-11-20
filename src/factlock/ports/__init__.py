@@ -11,6 +11,7 @@ from factlock.domain.models import (
     DraftRequest,
     Fact,
     Guideline,
+    GuidelineEntry,
     ReviewReport,
     StoredDocument,
     Target,
@@ -159,3 +160,15 @@ class DocumentLibrary(Protocol):
     def get(self, document_id: str) -> tuple[StoredDocument, Path] | None: ...
 
     def delete(self, document_id: str) -> bool: ...
+
+
+class GuidelineStore(Protocol):
+    """Keeps added guidelines and which ones are switched on."""
+
+    def load(self) -> list[GuidelineEntry]: ...
+
+    def save(self, entries: Sequence[GuidelineEntry]) -> None: ...
+
+    def load_switches(self) -> dict[str, bool]: ...
+
+    def save_switches(self, switches: dict[str, bool]) -> None: ...

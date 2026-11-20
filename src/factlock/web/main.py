@@ -23,6 +23,7 @@ from factlock.adapters.asset_store import FileAssetStore
 from factlock.adapters.doc_text import OfficeDocumentReader
 from factlock.adapters.document_library import FileDocumentLibrary
 from factlock.adapters.extra_facts import JsonExtraFacts
+from factlock.adapters.guideline_store import JsonGuidelineStore
 from factlock.adapters.json_repo import JsonCompanyData
 from factlock.adapters.sqlite_store import SqliteDraftStore
 from factlock.adapters.stored_writer import StoredCarouselWriter, StoredDraftWriter
@@ -68,6 +69,7 @@ def build() -> FastAPI:
         StoredCarouselWriter(folder / "carousels"),
         reader,
         FileDocumentLibrary(Path(os.environ.get("FACTLOCK_DOCUMENTS", ROOT / "var" / "documents"))),
+        JsonGuidelineStore(Path(os.environ.get("FACTLOCK_GUIDELINES", ROOT / "var" / "guidelines.json"))),
     )
     brand_file = folder / "brand.json"
     brand = json.loads(brand_file.read_text(encoding="utf-8")) if brand_file.is_file() else None

@@ -6,7 +6,7 @@ from pathlib import Path
 from factlock.application.briefing import WriterBrief
 from factlock.application.catalog import FactCatalog
 from factlock.application.documents import DocumentIngestion
-from factlock.application.guidelines import GuidelineBook
+from factlock.application.guidelines import GuidelineBook, UnknownGuideline
 from factlock.application.results import (
     Bundle,
     CarouselResult,
@@ -22,7 +22,15 @@ from factlock.application.results import (
 from factlock.application.reviewing import Reviewing
 from factlock.application.targets import TargetBook
 from factlock.application.writing import BlogWriting, CarouselWriting
-from factlock.domain.models import Carousel, Fact, Guideline, ReviewReport, StoredDocument, Target
+from factlock.domain.models import (
+    Carousel,
+    Fact,
+    Guideline,
+    GuidelineEntry,
+    ReviewReport,
+    StoredDocument,
+    Target,
+)
 from factlock.ports import (
     CarouselWriter,
     DocumentLibrary,
@@ -31,6 +39,7 @@ from factlock.ports import (
     DraftWriter,
     ExtraFactStore,
     FactExtractor,
+    GuidelineStore,
     MeaningReviewer,
     TargetPlanner,
 )
@@ -42,10 +51,12 @@ __all__ = [
     "DocumentView",
     "DraftResult",
     "FactLockService",
+    "GuidelineEntry",
     "Ingested",
     "Unavailable",
     "UnknownDocument",
     "UnknownFact",
+    "UnknownGuideline",
     "UnknownTarget",
 ]
 
@@ -67,9 +78,10 @@ class FactLockService:
         stored_carousel: CarouselWriter | None = None,
         document_reader: DocumentReader | None = None,
         document_library: DocumentLibrary | None = None,
+        guideline_store: GuidelineStore | None = None,
     ) -> None:
         self._catalog = FactCatalog(facts, extra_store)
-        self._guidelines = GuidelineBook(guideline)
+        self._guidelines = GuidelineBook(guideline, guideline_store)
         self._targets = TargetBook(targets, self._catalog, planner)
         self._reviewing = Reviewing(self._catalog, self._guidelines, reviewer)
         brief = WriterBrief(self._catalog, self._guidelines)
@@ -128,8 +140,17 @@ class FactLockService:
     def guideline(self) -> Guideline:
         return self._guidelines.current
 
-    def use_guideline(self, uploaded: Guideline) -> Guideline:
-        return self._guidelines.adopt(uploaded)
+    def guidelines(self) -> list[GuidelineEntry]:
+        return self._guidelines.all()
+
+    def add_guideline(self, name: str, uploaded: Guideline) -> GuidelineEntry:
+        return self._guidelines.add(name, uploaded)
+
+    def switch_guideline(self, entry_id: str, enabled: bool) -> GuidelineEntry:
+        return self._guidelines.switch(entry_id, enabled)
+
+    def remove_guideline(self, entry_id: str) -> None:
+        self._guidelines.remove(entry_id)
 
     # outputs
     @property
