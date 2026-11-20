@@ -492,8 +492,8 @@ function reportHtml(r) {
 }
 
 function renderDraft(d) {
-  const src = d.source !== "stored" ? `<div class="info">AI(${esc(d.source)})가 방금 쓴 초안입니다. 문장 ${d.blocks.filter((b) => b.type === "sentence").length}개가 사실 잠금 검사를 통과했고 ${d.dropped.length}개가 빠졌습니다.</div>` : `<div class="note">미리 저장해 둔 초안을 불러왔습니다. ${esc(d.fallback_message)}</div>`;
-  $("draftSource").innerHTML = src;
+  const origin = d.source !== "stored" ? `<div class="info">AI(${esc(d.source)})가 방금 쓴 초안입니다. 문장 ${d.blocks.filter((b) => b.type === "sentence").length}개가 사실 잠금 검사를 통과했고 ${d.dropped.length}개가 빠졌습니다.</div>` : `<div class="note">미리 저장해 둔 초안을 불러왔습니다. ${esc(d.fallback_message)}</div>`;
+  $("draftSource").innerHTML = origin;
   let html = `<p class="hd" style="font-size:18px">${esc(d.title || "(제목이 사실 잠금에서 빠졌습니다)")}</p>`, slot = 0;
   for (const b of d.blocks) {
     const chips = b.fact_ids.map((id) => `<button class="chip" data-fact="${esc(id)}">${esc(id)}</button>`).join("");
