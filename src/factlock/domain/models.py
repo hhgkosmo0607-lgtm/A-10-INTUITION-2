@@ -101,10 +101,35 @@ class Draft:
 
 
 @dataclass(frozen=True)
+class Slide:
+    """One Instagram carousel card."""
+
+    kicker: str
+    headline: str
+    body: str
+    fact_ids: tuple[str, ...] = ()
+
+    @property
+    def text(self) -> str:
+        return " ".join(part for part in (self.kicker, self.headline, self.body) if part)
+
+
+@dataclass(frozen=True)
+class Carousel:
+    slides: tuple[Slide, ...]
+    caption: tuple[Block, ...]
+    hashtags: tuple[str, ...]
+    source: str = "stored"
+    offer_without_price: Slide | None = None  # stored copy only: replaces price cards when prices are left out
+
+
+@dataclass(frozen=True)
 class DraftRequest:
     target: Target
     guideline: Guideline
     facts: tuple[Fact, ...]
+    include_price: bool = True
+    must_include: tuple[str, ...] = ()  # fact ids the marketer wants in the copy
 
 
 @dataclass(frozen=True)

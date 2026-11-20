@@ -36,6 +36,10 @@ How to write
 - Aim for a complete post a marketer could publish after filling the experience slot: roughly 25 to 40
   sentence blocks.
 - Tone: polite 해요체/합니다체, plain words, no exclamation marks, no superlatives.
+- The marketer picked the facts in must_include_fact_ids. Work each of them into the copy, close to its
+  original wording, with its id attached.
+- If the target has no price_fact_ids, the marketer chose to leave prices out: do not mention any price,
+  fee or quote, and close with how to ask for a consultation instead.
 
 Write like a good human copywriter, not like a fact sheet
 - Do not paste fact statements one per line. Rephrase them in natural Korean, speak to the reader's own
@@ -93,6 +97,7 @@ def build_prompt(request: DraftRequest) -> str:
             "bundle_fact_ids": list(request.target.bundle),
             "price_fact_ids": list(request.target.quote_items),
             "must_condition_ids": list(request.target.must_conditions),
+            "must_include_fact_ids": list(request.must_include),
         },
         "guideline": {
             "required_keywords": list(request.guideline.required_keywords),
@@ -242,3 +247,107 @@ EXTRACT_SCHEMA: dict[str, Any] = {
 def extract_prompt(pages: Sequence[tuple[str, str]]) -> str:
     payload = [{"locator": locator, "text": text} for locator, text in pages]
     return "List the usable facts in these pages.\n\n" + json.dumps(payload, ensure_ascii=False, indent=1)
+
+
+CAROUSEL_SYSTEM = """You write the copy for a Korean Instagram carousel for a B2B company's
+marketer, plus the post caption and hashtags.
+
+The one rule that matters: every factual statement must come from the fact list in the request.
+A rule engine checks each card and caption sentence after you: it compares the numbers, prices and product
+names with the facts whose ids you attached, and deletes anything that does not match.
+
+Cards: as many as the story needs, usually four to seven, never more than ten. Do not pad. Follow this arc,
+merging or adding steps as the content calls for
+1. hook: the reader's problem in their own words. No product name needed.
+2. problem: what goes wrong today, from the target's pain facts.
+3. solution: what the bundle does about it.
+4. proof or detail: one more concrete thing it does, or a number from the facts.
+5. offer: if the target has price_fact_ids, the price with its conditions. If it has none, the marketer
+   chose to leave prices out: mention no price or fee anywhere and invite the reader to ask for a consult.
+
+Each card has
+- "kicker": a short label of at most 10 characters (for example "고민", "해결", "비용").
+- "headline": at most 20 Korean characters including spaces. Count them before you answer.
+  Put a line break (\n) where it reads best,
+  around the middle. This is the line people read while swiping, so make it concrete and plain.
+- "body": one or two short sentences, at most 70 characters in total.
+- "fact_ids": ids of every fact the card relies on. A card with no ids must contain no number, price,
+  product name or superlative.
+
+Caption: three to six "sentence" blocks with fact ids, following the same rule. Begin with one sentence
+saying this is an advertisement made from materials the company provided (for example
+"티링크가 제공한 자료로 만든 광고입니다."). When a card or sentence uses a fact that lists "requires", the
+caption must include each required condition with that condition's id.
+Product facts list "trigger_words": any card or sentence containing one must carry that product's id.
+Copy numbers and prices exactly as the fact states them.
+
+The marketer picked the facts in must_include_fact_ids: work each of them into a card or the caption,
+close to its original wording, with its id attached.
+
+Hashtags: at most five, Korean, each starting with #, no spaces, no numbers, no superlatives. Choose the
+five that matter most: this customer's situation first, then the topic, with one brand tag.
+
+Tone: plain and calm, no exclamation marks, no superlatives, no emoji. Do not invent customer stories,
+statistics or personal experience."""
+
+CAROUSEL_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "slides": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "kicker": {"type": "string"},
+                    "headline": {"type": "string"},
+                    "body": {"type": "string"},
+                    "fact_ids": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["kicker", "headline", "body", "fact_ids"],
+                "additionalProperties": False,
+            },
+        },
+        "caption": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string"},
+                    "fact_ids": {"type": "array", "items": {"type": "string"}},
+                },
+                "required": ["text", "fact_ids"],
+                "additionalProperties": False,
+            },
+        },
+        "hashtags": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["slides", "caption", "hashtags"],
+    "additionalProperties": False,
+}
+
+
+def carousel_prompt(request: DraftRequest) -> str:
+    facts = [
+        {
+            "id": fact.id,
+            "kind": fact.kind,
+            "statement": fact.statement,
+            "status": fact.status.value,
+            **({"requires": list(fact.requires)} if fact.requires else {}),
+            **({"trigger_words": list(fact.anchors)} if fact.kind == "product" and fact.anchors else {}),
+        }
+        for fact in request.facts
+        if fact.status in (FactStatus.CONFIRMED, FactStatus.CLAIM)
+    ]
+    payload = {
+        "target": {
+            "name": request.target.name,
+            "pain_fact_ids": list(request.target.pains),
+            "bundle_fact_ids": list(request.target.bundle),
+            "price_fact_ids": list(request.target.quote_items),
+            "must_condition_ids": list(request.target.must_conditions),
+            "must_include_fact_ids": list(request.must_include),
+        },
+        "facts": facts,
+    }
+    return "Write the carousel for this target.\n\n" + json.dumps(payload, ensure_ascii=False, indent=1)

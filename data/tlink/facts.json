@@ -1189,7 +1189,7 @@
   {
     "id": "PRICE-MOBILE",
     "kind": "price",
-    "statement": "티링크 모바일 이용료는 1 USER 20,000원으로 안내되어 있으나, A·B·C 타입 요금과의 관계는 자료에 없습니다.",
+    "statement": "티링크 모바일 이용료는 1 USER 20,000원입니다.",
     "source": {
       "where": "홈페이지 www.tlinkcrm.com 티링크 모바일",
       "checked": "2026-11-20",
@@ -1205,7 +1205,8 @@
     "anchors": [
       "1 USER",
       "USER"
-    ]
+    ],
+    "scope": "(A·B·C 타입 요금과의 관계는 자료에 없습니다.)"
   },
   {
     "id": "COND-VAT",

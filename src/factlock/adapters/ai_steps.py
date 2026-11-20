@@ -4,8 +4,8 @@ from collections.abc import Sequence
 from typing import Any
 
 from factlock.adapters import prompts
-from factlock.adapters.stored_writer import draft_from_json
-from factlock.domain.models import Draft, DraftRequest, Fact
+from factlock.adapters.stored_writer import carousel_from_json, draft_from_json
+from factlock.domain.models import Carousel, Draft, DraftRequest, Fact
 from factlock.ports import AiError, DraftWriterError, JsonModel
 
 
@@ -25,6 +25,22 @@ class AiDraftWriter:
         source = getattr(self._model, "last_used", "") or self._model.name
         try:
             return draft_from_json(answer, source)
+        except (KeyError, TypeError, ValueError):
+            raise DraftWriterError("ai_bad_output") from None
+
+
+class AiCarouselWriter:
+    def __init__(self, model: JsonModel) -> None:
+        self._model = model
+
+    def write_carousel(self, request: DraftRequest) -> Carousel:
+        try:
+            answer = self._model.ask(prompts.CAROUSEL_SYSTEM, prompts.carousel_prompt(request), prompts.CAROUSEL_SCHEMA)
+        except AiError as error:
+            raise DraftWriterError(error.code) from None
+        source = getattr(self._model, "last_used", "") or self._model.name
+        try:
+            return carousel_from_json(answer, source)
         except (KeyError, TypeError, ValueError):
             raise DraftWriterError("ai_bad_output") from None
 

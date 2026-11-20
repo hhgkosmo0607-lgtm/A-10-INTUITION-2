@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from typing import Any, Protocol
 
-from factlock.domain.models import Draft, DraftRequest, Fact, Guideline, ReviewReport, Target
+from factlock.domain.models import Carousel, Draft, DraftRequest, Fact, Guideline, ReviewReport, Target
 
 
 class FactRepository(Protocol):
@@ -32,6 +32,12 @@ class DraftWriter(Protocol):
     """Writes a draft from allowed facts only. Raises DraftWriterError when unavailable."""
 
     def write(self, request: DraftRequest) -> Draft: ...
+
+
+class CarouselWriter(Protocol):
+    """Writes Instagram carousel copy from allowed facts only. Raises DraftWriterError when unavailable."""
+
+    def write_carousel(self, request: DraftRequest) -> Carousel: ...
 
 
 class DraftStore(Protocol):

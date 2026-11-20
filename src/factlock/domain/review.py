@@ -200,6 +200,27 @@ def _disclosure(text: str) -> RuleResult:
     return RuleResult("R10", "광고 표시", Verdict.CHECK, (note,))
 
 
+_WORD = re.compile(r"[가-힣A-Za-z0-9]{2,}")
+
+
+def mentions(text: str, fact: Fact) -> bool:
+    """Rough text check that a fact made it into the copy: its values, or most of its words."""
+    if fact.values:
+        present = {item.value for item in extract_values(text)}
+        return all(value in present for value in fact.values[:1])
+    words = _WORD.findall(fact.statement)
+    if not words:
+        return True
+    hits = sum(1 for word in words if contains(text, word[:4]))
+    return hits / len(words) >= 0.5
+
+
+def must_include_result(text: str, must: Sequence[Fact]) -> RuleResult:
+    missing = [Finding(f"꼭 넣기로 한 내용이 글에 보이지 않습니다: {f.statement}", fact_ids=(f.id,)) for f in must]
+    missing = [m for m, f in zip(missing, must, strict=True) if not mentions(text, f)]
+    return _result("M1", "꼭 넣을 내용", missing)
+
+
 def review(
     title: str, body: str, facts: Sequence[Fact], guideline: Guideline, target: Target | None = None
 ) -> ReviewReport:

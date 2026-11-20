@@ -60,6 +60,16 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
 .post .sec{font-weight:700;font-size:17px;margin:22px 0 8px;padding-left:10px;border-left:4px solid var(--accent);border-radius:0}
 .post .todo{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 10px}
 .post .foot{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:14px;color:var(--sub)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.cardbox canvas{width:100%;height:auto;border-radius:10px;display:block;border:1px solid var(--line)}
+.cardbox input,.cardbox textarea{width:100%;margin-top:5px;font-size:13px;padding:5px 7px;min-height:0}
+.cardbox textarea{height:62px;line-height:1.4}
+.tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:none;font:inherit;padding:10px 16px;cursor:pointer;color:var(--sub);border-bottom:3px solid transparent;border-radius:0}
+.tabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.asset img,.post img{width:100%;border-radius:10px;display:block;border:1px solid var(--line)}
+.post img{margin:6px 0 14px}
+select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid var(--line);background:#fff;width:100%;margin-top:5px}
 [hidden]{display:none!important}
 @media (max-width:560px){main,header{padding-left:14px;padding-right:14px}.card{padding:14px}}
 </style>
@@ -72,11 +82,11 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
 <main>
   <nav class="steps" aria-label="단계">
     <button data-step="1">1 타깃 고르기</button>
-    <button data-step="2">2 묶음과 견적</button>
-    <button data-step="3">3 초안</button>
-    <button data-step="4">4 검수</button>
+    <button data-step="2">2 넣을 내용 정하기</button>
+    <button data-step="3">3 결과물</button>
     <button data-step="5">받은 글 검수</button>
     <button data-step="6">사실 목록</button>
+    <button data-step="7">홍보 자료함</button>
   </nav>
   <div id="error" class="err" role="alert" hidden></div>
 
@@ -84,11 +94,11 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
     <h2>누구에게 보여 줄 글인가요?</h2>
     <p class="sub">타깃을 고르면 그 타깃에 맞는 제품 묶음과 글이 정해집니다.</p>
     <div class="row" id="targets"></div>
-    <h3>목록에 없는 고객이라면</h3>
-    <p class="sub">어떤 고객인지 적으면 AI가 사실 목록 안에서 맞는 제품 묶음을 골라 줍니다.</p>
+    <h3>타깃 추가</h3>
+    <p class="sub">목록에 없는 고객이라면 어떤 고객인지 적어 주세요. AI가 사실 목록 안에서 그 고객에게 맞는 제품·고민·조건을 골라 새 타깃으로 추가합니다.</p>
     <div class="row">
       <input type="text" id="customTarget" placeholder="예: 직원 10명 규모의 여행사 예약 상담팀" style="flex:1 1 280px" maxlength="200" aria-label="고객 설명">
-      <button class="ghost" id="planBtn">AI로 묶음 만들기</button>
+      <button class="ghost" id="planBtn">타깃 추가</button>
     </div>
     <h3>가이드라인</h3>
     <p class="sub" id="guideSummary"></p>
@@ -97,11 +107,12 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
       <button class="ghost" id="guideUpload">가이드라인 올리기</button>
     </div>
     <p class="small">올리지 않으면 저장된 티링크 가이드라인을 씁니다.</p>
-    <div class="row" style="margin-top:14px"><button class="go" id="to2" disabled>다음: 묶음과 견적</button></div>
+    <div class="row" style="margin-top:14px"><button class="go" id="to2" disabled>다음: 넣을 내용 정하기</button></div>
   </section>
 
   <section id="s2" class="card" hidden>
-    <h2 id="bundleTitle">추천 구성</h2>
+    <h2 id="bundleTitle">글에 넣을 내용</h2>
+    <p class="sub">사실 목록에서 이 타깃에 맞는 내용이 자동으로 골라졌습니다. 고를 필요 없이 확인만 하면 됩니다.</p>
     <div class="note" id="proposed" hidden>이 묶음은 자료를 보고 만든 제안입니다. 담당자 확인 전입니다.</div>
     <div class="info" id="aiReason" hidden></div>
     <h3>이 타깃의 고민 <span class="small">(회사 자료에 있는 문장)</span></h3>
@@ -110,14 +121,51 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
     <table><thead><tr><th>제품</th><th>출처</th></tr></thead><tbody id="products"></tbody></table>
     <h3>꼭 함께 알려야 하는 조건</h3>
     <ul id="conds"></ul>
-    <h3>예시 견적</h3>
+    <h3>꼭 넣을 내용 <span class="small">(선택)</span></h3>
+    <p class="sub">위 묶음은 사실 목록에서 자동으로 골라진 것입니다. 글에 꼭 넣고 싶은 내용이 있으면 사실 목록에서 고르거나 직접 적어 추가하세요.</p>
+    <div id="mustList"></div>
+    <div class="row"><input type="text" id="mustQ" placeholder="사실 목록에서 찾기 (예: 암호화, 특허, 콜백)" style="flex:1 1 260px" aria-label="꼭 넣을 사실 찾기"></div>
+    <div id="mustFound"></div>
+    <div class="row" style="margin-top:8px"><input type="text" id="mustNew" placeholder="목록에 없는 내용 직접 추가 (예: 12월 한 달 동안 설치 상담을 무료로 진행합니다.)" style="flex:1 1 320px" maxlength="200" aria-label="직접 추가할 내용"><button class="ghost" id="mustAdd">직접 추가</button></div>
+    <p class="small">직접 추가한 내용은 출처가 '담당자가 직접 입력'으로 사실 목록에 기록되고, 담당자가 책임지는 사실로 취급됩니다.</p>
+    <h3>가격 <span class="small">(선택)</span></h3>
+    <div class="row"><label><input type="checkbox" id="incPrice"> 글에 가격 넣기</label><span class="small">광고 글에는 보통 가격을 넣지 않습니다. 넣으면 부가세 별도·예시 견적 같은 조건이 함께 들어갑니다.</span></div>
+    <div id="quoteBox" hidden>
+    <p class="sub" style="margin-top:8px">글에 들어갈 가격의 근거입니다. 상담원 수를 바꾸면 예시 견적을 다시 계산합니다.</p>
     <div class="row"><label for="agents">상담원 수</label><input type="number" id="agents" min="1" max="10000" value="5" style="width:100px"><button class="ghost" id="recalc">다시 계산</button></div>
     <div id="quote"></div>
-    <div class="row" style="margin-top:14px"><button class="go" id="to3">다음: 초안 만들기</button><label class="small"><input type="checkbox" id="useStored"> 저장된 초안 쓰기 (AI를 부르지 않음)</label></div>
+    </div>
+    <h3>결과물 만들기</h3>
+    <p class="small">블로그 글(네이버·티스토리용) 한 편과 인스타 캐러셀(넘겨 보는 카드, 게시물 문구, 해시태그 5개 이내)을 함께 만듭니다.</p>
+    <div class="row" style="margin-top:8px"><button class="go" id="makeBoth">결과물 만들기</button><label class="small"><input type="checkbox" id="useStored"> 저장된 초안 쓰기 (AI를 부르지 않음)</label></div>
   </section>
 
   <section id="s3" class="card" hidden>
-    <h2>초안</h2>
+   <div class="tabs" role="tablist"><button id="tabBlog" role="tab">블로그 글</button><button id="tabCar" role="tab">인스타 캐러셀</button></div>
+   <div id="carBox" hidden>
+    <div id="carState"></div>
+    <div id="carBody" hidden>
+    <h2>인스타 캐러셀</h2>
+    <div id="carSource"></div>
+    <p class="sub">글을 고치면 카드 그림이 바로 바뀝니다. 고친 뒤에는 [다시 검수]를 눌러 주세요.</p>
+    <div class="cards" id="cards"></div>
+    <h3>게시물 문구</h3>
+    <textarea id="carCaption" style="min-height:150px" aria-label="게시물 문구"></textarea>
+    <h3>해시태그</h3>
+    <input type="text" id="carTags" style="width:100%" aria-label="해시태그">
+    <div class="row" style="margin:12px 0"><button class="go" id="carCheck">다시 검수</button><button class="ghost" id="carPng" disabled>카드 이미지 내려받기 (PNG)</button><button class="ghost" id="carCopy" disabled>문구와 해시태그 복사</button><span class="small" id="carHint"></span></div>
+    <div id="carReport"></div>
+    <div id="carDroppedBox" hidden>
+      <h3>사실 잠금에서 빠진 것</h3>
+      <table><thead><tr><th>내용</th><th>뺀 이유</th></tr></thead><tbody id="carDropped"></tbody></table>
+    </div>
+    <div id="carFactPop" class="factbox" hidden></div>
+    </div>
+   </div>
+   <div id="blogBox">
+    <div id="blogState"></div>
+    <div id="blogBody" hidden>
+    <h2>블로그 글 초안</h2>
     <div id="draftSource"></div>
     <p class="sub">문장 끝의 번호를 누르면 근거가 된 사실과 출처가 보입니다.</p>
     <div id="factPop" class="factbox" hidden></div>
@@ -127,22 +175,27 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
       <p class="sub">AI가 쓴 문장 가운데 근거 사실과 맞지 않아 뺀 문장입니다.</p>
       <table><thead><tr><th>문장</th><th>뺀 이유</th></tr></thead><tbody id="dropped"></tbody></table>
     </div>
-    <div class="row" style="margin-top:14px"><button class="go" id="to4">다음: 검수</button></div>
-  </section>
-
-  <section id="s4" class="card" hidden>
-    <h2>검수</h2>
+    <div class="row" style="margin-top:14px"><button class="go" id="to4">검수와 내보내기</button></div>
+    <div id="blogReview" hidden>
+    <h3 style="font-size:18px;margin-top:26px">검수와 내보내기</h3>
     <p class="sub">글을 고친 뒤 [다시 검수]를 누르세요. 실패가 없어야 내려받을 수 있습니다.</p>
     <label for="fTitle" class="small">제목</label>
     <input type="text" id="fTitle" style="width:100%;margin-bottom:8px">
     <label for="fBody" class="small">본문</label>
     <textarea id="fBody"></textarea>
-    <div class="row" style="margin:10px 0"><button class="go" id="recheck">다시 검수</button><label class="small"><input type="checkbox" id="ai4"> AI 의미 검수도 하기</label><button class="ghost" id="download" disabled>글 내려받기 (.md)</button><button class="ghost" id="copy" disabled>글 복사</button><span class="small" id="dlHint"></span></div>
+    <div class="row" style="margin:10px 0"><button class="go" id="recheck">다시 검수</button><label class="small"><input type="checkbox" id="ai4"> AI 의미 검수도 하기</label><button class="ghost" id="download" disabled>글 내려받기 (.md)</button><button class="ghost" id="copy" disabled>글 복사</button><button class="ghost" id="copyRich" disabled>서식 포함 복사 (네이버·티스토리)</button><span class="small" id="dlHint"></span></div>
     <div id="report4"></div>
     <h3>완성본 미리보기</h3>
     <p class="sub">블로그에 올렸을 때의 모습입니다. 실제 게시는 하지 않습니다.</p>
     <article class="post" id="preview"></article>
+    <h3>소제목 아래에 넣을 이미지</h3>
+    <p class="sub">홍보 자료함의 이미지를 고르면 미리보기에 들어갑니다. 블로그에는 이미지를 직접 올려야 하며, 내려받은 글에는 넣을 위치와 파일 이름이 표시됩니다.</p>
+    <div id="blogImgs"></div>
+    </div>
+    </div>
+   </div>
   </section>
+
 
   <section id="s5" class="card" hidden>
     <h2>받은 글 검수</h2>
@@ -168,6 +221,13 @@ td .ghost{padding:4px 10px;font-size:13px;margin:2px 4px 2px 0}
     <div class="row" style="margin-bottom:8px"><input type="text" id="factQ" placeholder="낱말로 찾기" style="flex:1 1 200px" aria-label="사실 찾기"></div>
     <table><thead><tr><th>번호</th><th>사실</th><th>상태</th><th>출처</th></tr></thead><tbody id="facts"></tbody></table>
   </section>
+  <section id="s7" class="card" hidden>
+    <h2>홍보 자료함</h2>
+    <p class="sub">실제 서비스 화면, 제품 사진처럼 회사가 가진 홍보 이미지를 넣어 두는 곳입니다. 인스타 카드의 배경과 블로그 글의 소제목 아래에 골라 넣을 수 있습니다. 이 컴퓨터에만 저장되고 Git에는 올라가지 않습니다.</p>
+    <div class="row"><input type="file" id="assetFile" accept="image/png,image/jpeg,image/webp" aria-label="홍보 이미지 파일"><input type="text" id="assetCaption" placeholder="무엇이 보이는 이미지인가요? 예: AI 통화요약 화면" style="flex:1 1 240px" maxlength="120" aria-label="이미지 설명"><button class="go" id="assetAdd">자료 넣기</button></div>
+    <p class="small">PNG, JPG, WEBP · 10MB 이하. 사용 권한이 있는 이미지만 넣어 주세요. 고객 정보가 보이는 화면은 가린 뒤에 넣어 주세요.</p>
+    <div class="cards" id="assetGrid" style="margin-top:12px"></div>
+  </section>
 </main>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -179,7 +239,7 @@ const src = (f) => {
 const won = (n) => Number(n).toLocaleString("ko-KR") + "원";
 const VERDICT = {pass: "통과", fail: "실패", check: "확인 필요"};
 const STATUS = {confirmed: ["확정", "pass"], conflict: ["확인 필요", "fail"], claim: ["회사 주장", "check"], pending: ["확정 대기", "check"]};
-const S = {step: 1, target: null, state: null, draft: null, facts: null, reached: 1};
+const S = {must: [], assets: [], imgs: new Map(), blogImg: {}, mode: "blog", car: null, step: 1, target: null, state: null, draft: null, facts: null, reached: 1};
 
 async function api(path, options) {
   $("error").hidden = true;
@@ -197,13 +257,13 @@ const post = (path, body) => api(path, {method: "POST", headers: {"Content-Type"
 function fail(error) { $("error").textContent = error.message; $("error").hidden = false; window.scrollTo({top: 0}); }
 
 function show(step) {
-  S.step = step; if (step <= 4) S.reached = Math.max(S.reached, step);
-  for (let i = 1; i <= 6; i++) $("s" + i).hidden = i !== step;
+  S.step = step; if (step <= 3) S.reached = Math.max(S.reached, step);
+  for (const i of [1, 2, 3, 5, 6, 7]) $("s" + i).hidden = i !== step;
   document.querySelectorAll(".steps button").forEach((b) => {
     const n = Number(b.dataset.step);
     b.toggleAttribute("aria-current", false);
     if (n === step) b.setAttribute("aria-current", "step");
-    b.disabled = n >= 2 && n <= 4 && n > S.reached;
+    b.disabled = n >= 2 && n <= 3 && n > S.reached;
   });
 }
 
@@ -218,7 +278,7 @@ function renderTargets() {
   $("targets").innerHTML = S.state.targets.map((t) => `<button class="pick" data-id="${esc(t.id)}" aria-pressed="${t.id === S.target}"><b>${esc(t.name)}</b><span class="small">${TARGET_NOTE[t.status] || "확인됨"}</span></button>`).join("");
   $("pTarget").innerHTML = `<option value="">타깃 없이</option>` + S.state.targets.map((t) => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
   document.querySelectorAll(".pick").forEach((b) => b.addEventListener("click", () => {
-    S.target = b.dataset.id; S.reached = 1; S.draft = null;
+    S.target = b.dataset.id; S.reached = 1; S.draft = null; S.must = []; renderMust();
     document.querySelectorAll(".pick").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     $("to2").disabled = false; show(1);
   }));
@@ -231,13 +291,51 @@ function previewHtml(title, body) {
   let html = `<h4>${esc(title)}</h4>`, foot = [];
   for (const raw of body.split("\n")) {
     const line = raw.trim(); if (!line) continue;
-    if (line.startsWith("■")) html += `<p class="sec">${esc(line.slice(1).trim())}</p>`;
+    if (line.startsWith("■")) { const h = line.slice(1).trim(), a = S.assets.find((x) => x.id === S.blogImg[h]); html += `<p class="sec">${esc(h)}</p>` + (a ? `<img src="${esc(a.url)}" alt="${esc(a.caption)}">` : ""); }
     else if (/^\[[^\]]*\]$/.test(line)) html += `<p class="todo">${esc(line)}</p>`;
     else if (/^(홈페이지|블로그|상담 문의|상담 신청):/.test(line)) foot.push(esc(line));
     else html += `<p>${esc(line)}</p>`;
   }
   return html + (foot.length ? `<div class="foot">${foot.join("<br>")}</div>` : "");
 }
+function richHtml(title, body) {
+  let html = `<h2>${esc(title)}</h2>`;
+  for (const raw of body.split("\n")) {
+    const line = raw.trim(); if (!line) continue;
+    html += line.startsWith("■") ? `<h3>${esc(line.slice(1).trim())}</h3>` : `<p>${esc(line)}</p>`;
+  }
+  return html;
+}
+function assetOptions(selected) { return `<option value="">배경 이미지 없음</option>` + S.assets.map((a) => `<option value="${esc(a.id)}"${a.id === selected ? " selected" : ""}>${esc(a.caption)}</option>`).join(""); }
+function suggestAsset(text) {
+  let best = "", top = 0;
+  for (const a of S.assets) { const score = a.caption.split(/\s+/).filter((w) => w.length >= 2 && text.includes(w)).length; if (score > top) { top = score; best = a.id; } }
+  return top >= 2 ? best : "";
+}
+async function loadAssets() {
+  S.assets = await api("/api/assets");
+  for (const a of S.assets) if (!S.imgs.has(a.id)) { const im = new Image(); im.src = a.url; S.imgs.set(a.id, im); }
+}
+function renderAssets() {
+  $("assetGrid").innerHTML = S.assets.map((a) => `<div class="asset"><img src="${esc(a.url)}" alt="${esc(a.caption)}"><div style="margin-top:6px">${esc(a.caption)}</div><div class="small">${esc(a.filename)}</div><button class="ghost" data-del="${esc(a.id)}" style="margin-top:6px;padding:4px 10px;font-size:13px">지우기</button></div>`).join("") || `<p class="small">아직 넣은 자료가 없습니다.</p>`;
+  $("assetGrid").querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", async () => { try { await api(`/api/assets/${b.dataset.del}`, {method: "DELETE"}); await loadAssets(); renderAssets(); } catch (e) { fail(e); } }));
+}
+function renderBlogImgs() {
+  const heads = $("fBody").value.split("\n").map((l) => l.trim()).filter((l) => l.startsWith("■")).map((l) => l.slice(1).trim());
+  if (!S.assets.length) { $("blogImgs").innerHTML = `<p class="small">홍보 자료함에 이미지를 넣으면 여기서 고를 수 있습니다.</p>`; return; }
+  heads.forEach((h) => { if (!(h in S.blogImg)) S.blogImg[h] = suggestAsset(h); });
+  $("blogImgs").innerHTML = heads.map((h, i) => `<label class="small">${esc(h)}<select data-head="${i}">${assetOptions(S.blogImg[h])}</select></label>`).join("");
+  $("blogImgs").querySelectorAll("select").forEach((s) => s.addEventListener("change", () => { S.blogImg[heads[Number(s.dataset.head)]] = s.value; $("preview").innerHTML = previewHtml($("fTitle").value, $("fBody").value); }));
+  $("preview").innerHTML = previewHtml($("fTitle").value, $("fBody").value);
+}
+$("assetAdd").addEventListener("click", () => {
+  const file = $("assetFile").files[0];
+  if (!file) { fail(new Error("넣을 이미지 파일을 먼저 골라 주세요.")); return; }
+  busy($("assetAdd"), "넣는 중…", async () => {
+    const form = new FormData(); form.append("file", file); form.append("caption", $("assetCaption").value);
+    await api("/api/assets", {method: "POST", body: form}); $("assetCaption").value = ""; $("assetFile").value = ""; await loadAssets(); renderAssets();
+  });
+});
 async function init() {
   S.state = await api("/api/state");
   $("liveBadge").textContent = S.state.live ? `AI 연결됨 (${S.state.engine})` : "연결된 AI 없음 (저장된 초안 사용)";
@@ -253,7 +351,7 @@ async function loadBundle() {
   const agents = Number($("agents").value);
   if (!Number.isInteger(agents) || agents < 1) { fail(new Error("상담원 수를 1 이상의 숫자로 입력해 주세요.")); return false; }
   const b = await post("/api/bundle", {target_id: S.target, agents});
-  $("bundleTitle").textContent = `'${b.target.name}'에 맞춘 추천 구성`;
+  $("bundleTitle").textContent = `'${b.target.name}' 글에 넣을 내용`;
   $("proposed").hidden = b.target.status === "confirmed";
   $("aiReason").hidden = !b.reason; $("aiReason").textContent = b.reason ? "AI가 이 묶음을 고른 이유: " + b.reason : "";
   $("pains").innerHTML = b.pains.map((f) => `<li>${esc(f.statement)}<br><span class="small">${src(f)}</span></li>`).join("");
@@ -308,26 +406,151 @@ function bodyWithSlots() {
 
 async function check(titleEl, bodyEl, target, out, ai) {
   if (ai) out.innerHTML = `<div class="info">AI가 글의 뜻을 사실 목록과 대조하는 중입니다. 1분쯤 걸립니다…</div>`;
-  const r = await post("/api/review", {title: titleEl.value, body: bodyEl.value, target_id: target || null, ai: !!ai});
+  const r = await post("/api/review", {title: titleEl.value, body: bodyEl.value, target_id: target || null, ai: !!ai, must_include: out.id === "report4" ? S.must.map((f) => f.id) : []});
   out.innerHTML = reportHtml(r);
   return r;
 }
 
 $("to2").addEventListener("click", async () => { try { if (await loadBundle()) show(2); } catch (e) { fail(e); } });
 $("recalc").addEventListener("click", () => loadBundle().catch(fail));
-$("to3").addEventListener("click", async () => {
-  const live = !$("useStored").checked;
-  await busy($("to3"), live ? "AI가 초안을 쓰는 중… (1~2분)" : "초안을 불러오는 중…", async () => {
-    S.draft = await post("/api/drafts", {target_id: S.target, live}); renderDraft(S.draft); show(3);
-  });
+$("incPrice").addEventListener("change", () => { $("quoteBox").hidden = !$("incPrice").checked; });
+function wrapLines(ctx, text, maxWidth) {
+  const out = [];
+  for (const para of String(text).split("\n")) {
+    let line = "";
+    for (const word of para.split(" ")) {
+      const trial = line ? line + " " + word : word;
+      if (ctx.measureText(trial).width <= maxWidth) { line = trial; continue; }
+      if (line) out.push(line);
+      line = "";
+      for (const ch of word) { if (ctx.measureText(line + ch).width > maxWidth) { out.push(line); line = ch; } else line += ch; }
+    }
+    out.push(line);
+  }
+  return out;
+}
+function drawCard(canvas, slide, index, total) {
+  const b = S.state.brand, W = 1080, H = 1350, ctx = canvas.getContext("2d");
+  canvas.width = W; canvas.height = H;
+  const font = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H);
+  const img = slide.asset ? S.imgs.get(slide.asset) : null;
+  if (img && img.complete && img.naturalWidth) {
+    const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * scale, h = img.naturalHeight * scale;
+    ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+    ctx.globalAlpha = 0.72; ctx.fillStyle = b.background; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+  }
+  ctx.fillStyle = b.accent; ctx.fillRect(80, 150, 90, 8);
+  ctx.textBaseline = "top"; ctx.fillStyle = b.text;
+  ctx.font = `700 34px ${font}`; ctx.fillText(b.name, 80, 80);
+  ctx.globalAlpha = 0.7; ctx.textAlign = "right"; ctx.font = `500 32px ${font}`; ctx.fillText(`${index} / ${total}`, W - 80, 82); ctx.textAlign = "left"; ctx.globalAlpha = 1;
+  let y = 420;
+  ctx.fillStyle = b.accent; ctx.font = `700 40px ${font}`; ctx.fillText(slide.kicker, 80, y); y += 84;
+  ctx.fillStyle = b.text; ctx.font = `800 96px ${font}`;
+  for (const line of wrapLines(ctx, slide.headline, W - 160)) { ctx.fillText(line, 80, y); y += 124; }
+  y += 36; ctx.globalAlpha = 0.9; ctx.font = `400 44px ${font}`;
+  for (const line of wrapLines(ctx, slide.body, W - 160)) { ctx.fillText(line, 80, y); y += 66; }
+  ctx.globalAlpha = 0.55; ctx.font = `400 28px ${font}`; ctx.fillText("회사 자료에 근거해 만든 광고", 80, H - 110); ctx.globalAlpha = 1;
+}
+function carSlides() {
+  return [...document.querySelectorAll(".cardbox")].map((box) => ({kicker: box.querySelector(".k").value, headline: box.querySelector(".h").value, body: box.querySelector(".b").value, asset: box.querySelector(".img").value}));
+}
+function carDirty() { $("carPng").disabled = $("carCopy").disabled = true; $("carHint").textContent = "글이 바뀌었습니다. 다시 검수해 주세요."; }
+function carGate(r) {
+  $("carReport").innerHTML = reportHtml(r);
+  $("carPng").disabled = $("carCopy").disabled = r.counts.fail > 0;
+  $("carHint").textContent = r.counts.fail > 0 ? `실패 ${r.counts.fail}건을 고치면 내려받을 수 있습니다.` : "";
+}
+function renderCarousel(d) {
+  $("carSource").innerHTML = d.source !== "stored" ? `<div class="info">AI(${esc(d.source)})가 방금 쓴 캐러셀입니다. 카드 ${d.slides.length}장이 사실 잠금 검사를 통과했고 ${d.dropped.length}개가 빠졌습니다.</div>` : `<div class="note">미리 저장해 둔 캐러셀을 불러왔습니다. ${esc(d.fallback_message)}</div>`;
+  $("cards").innerHTML = d.slides.map((s, i) => `<div class="cardbox"><canvas aria-label="카드 ${i + 1}"></canvas><input class="k" value="${esc(s.kicker)}" maxlength="10" aria-label="카드 ${i + 1} 머리말"><textarea class="h" maxlength="60" aria-label="카드 ${i + 1} 제목">${esc(s.headline)}</textarea><textarea class="b" maxlength="200" aria-label="카드 ${i + 1} 본문">${esc(s.body)}</textarea><select class="img" aria-label="카드 ${i + 1} 배경 이미지">${assetOptions(suggestAsset(s.headline + " " + s.body))}</select><div>${s.fact_ids.map((id) => `<button class="chip" data-fact="${esc(id)}">${esc(id)}</button>`).join("")}</div></div>`).join("");
+  const boxes = [...document.querySelectorAll(".cardbox")];
+  const paint = () => carSlides().forEach((s, i) => drawCard(boxes[i].querySelector("canvas"), s, i + 1, boxes.length));
+  paint();
+  boxes.forEach((box) => box.querySelectorAll("input,textarea").forEach((el) => el.addEventListener("input", () => { paint(); carDirty(); })));
+  boxes.forEach((box) => box.querySelector(".img").addEventListener("change", paint));
+  S.repaintCards = paint; S.imgs.forEach((im) => { if (!im.complete) im.addEventListener("load", paint, {once: true}); });
+  $("cards").querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+    const f = d.facts[c.dataset.fact]; if (!f) return;
+    $("carFactPop").innerHTML = `<b>${esc(f.id)}</b> <span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span><br>${esc(f.statement)}<br><span class="small">출처: ${src(f)}</span>`;
+    $("carFactPop").hidden = false; $("carFactPop").scrollIntoView({block: "nearest"});
+  }));
+  $("carCaption").value = d.caption.map((b) => b.text).join("\n");
+  $("carTags").value = d.hashtags.join(" ");
+  $("carDroppedBox").hidden = d.dropped.length === 0;
+  $("carDropped").innerHTML = d.dropped.map((x) => `<tr><td>${esc(x.text)}</td><td>${esc(x.reason)}</td></tr>`).join("");
+  $("carFactPop").hidden = true;
+  carGate(d.report);
+}
+$("carCaption").addEventListener("input", carDirty); $("carTags").addEventListener("input", carDirty);
+$("carCheck").addEventListener("click", () => busy($("carCheck"), "검수하는 중…", async () => {
+  carGate(await post("/api/carousel/review", {target_id: S.target, slides: carSlides(), caption: $("carCaption").value, hashtags: $("carTags").value.split(/\s+/).filter(Boolean), must_include: S.must.map((f) => f.id)}));
+}));
+$("carPng").addEventListener("click", () => {
+  document.querySelectorAll(".cardbox canvas").forEach((canvas, i) => canvas.toBlob((blob) => {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `carousel_${i + 1}.png`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }, "image/png"));
+});
+$("carCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(`${$("carCaption").value}\n\n${$("carTags").value}`); $("carHint").textContent = "문구와 해시태그를 복사했습니다."; }
+  catch { $("carHint").textContent = "복사하지 못했습니다. 칸에서 직접 복사해 주세요."; }
+});
+function setTab(mode) {
+  S.mode = mode; $("carBox").hidden = mode !== "car"; $("blogBox").hidden = mode !== "blog";
+  $("tabBlog").setAttribute("aria-selected", String(mode === "blog")); $("tabCar").setAttribute("aria-selected", String(mode === "car"));
+}
+$("tabBlog").addEventListener("click", () => setTab("blog")); $("tabCar").addEventListener("click", () => setTab("car"));
+function stateBox(el, message, retry) {
+  el.innerHTML = message ? `<div class="${retry ? "err" : "info"}">${esc(message)}${retry ? ` <button class="ghost" style="margin-left:8px">다시 만들기</button>` : ""}</div>` : "";
+  if (retry) el.querySelector("button").addEventListener("click", retry);
+}
+function makeOptions() { return {target_id: S.target, live: !$("useStored").checked, include_price: $("incPrice").checked, must_include: S.must.map((f) => f.id)}; }
+function renderMust() {
+  $("mustList").innerHTML = S.must.map((f) => `<div class="factbox" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${esc(f.statement)} <span class="small">(${esc(f.source)})</span></span><button class="ghost" data-rm="${esc(f.id)}" style="padding:3px 10px;font-size:13px">빼기</button></div>`).join("");
+  $("mustList").querySelectorAll("[data-rm]").forEach((b) => b.addEventListener("click", () => { S.must = S.must.filter((f) => f.id !== b.dataset.rm); renderMust(); }));
+}
+function addMust(fact) {
+  if (S.must.length >= 10) { fail(new Error("꼭 넣을 내용은 10개까지 고를 수 있습니다.")); return; }
+  if (!S.must.some((f) => f.id === fact.id)) S.must.push(fact);
+  renderMust();
+}
+$("mustQ").addEventListener("input", async () => {
+  const q = $("mustQ").value.trim().toLowerCase();
+  if (q.length < 2) { $("mustFound").innerHTML = ""; return; }
+  try { if (!S.facts) S.facts = await api("/api/facts"); } catch (e) { fail(e); return; }
+  const hits = S.facts.filter((f) => ["confirmed", "claim"].includes(f.status) && f.kind !== "contact" && (f.statement + f.id).toLowerCase().includes(q)).slice(0, 6);
+  $("mustFound").innerHTML = hits.map((f) => `<button class="pick" data-add="${esc(f.id)}" style="flex:none;width:100%;margin-top:6px;padding:8px 12px"><span class="small">${esc(f.id)}</span> ${esc(f.statement)}</button>`).join("") || `<p class="small">찾는 사실이 없습니다. 아래에서 직접 추가할 수 있습니다.</p>`;
+  $("mustFound").querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", () => { addMust(hits.find((f) => f.id === b.dataset.add)); $("mustQ").value = ""; $("mustFound").innerHTML = ""; }));
+});
+$("mustAdd").addEventListener("click", () => {
+  const statement = $("mustNew").value.trim();
+  if (statement.length < 4) { fail(new Error("추가할 내용을 네 글자 이상 적어 주세요.")); return; }
+  busy($("mustAdd"), "추가하는 중…", async () => { const fact = await post("/api/facts", {statement}); S.facts = null; addMust(fact); $("mustNew").value = ""; });
+});
+async function makeBlog() {
+  const o = makeOptions(); $("blogBody").hidden = true;
+  stateBox($("blogState"), o.live ? "AI가 블로그 글을 쓰는 중입니다. 1~2분 걸립니다…" : "저장된 글을 불러오는 중…");
+  try { S.draft = await post("/api/drafts", o); renderDraft(S.draft); $("blogReview").hidden = true; $("blogBody").hidden = false; stateBox($("blogState"), ""); }
+  catch (e) { $("error").hidden = true; stateBox($("blogState"), "블로그 글을 만들지 못했습니다. " + e.message, makeBlog); }
+}
+async function makeCar() {
+  const o = makeOptions(); $("carBody").hidden = true;
+  stateBox($("carState"), o.live ? "AI가 인스타 캐러셀을 쓰는 중입니다. 1분쯤 걸립니다…" : "저장된 캐러셀을 불러오는 중…");
+  try { S.car = await post("/api/carousel", o); $("carBody").hidden = false; renderCarousel(S.car); stateBox($("carState"), ""); }
+  catch (e) { $("error").hidden = true; stateBox($("carState"), "인스타 캐러셀을 만들지 못했습니다. " + e.message, makeCar); }
+}
+$("makeBoth").addEventListener("click", async () => {
+  try { await loadAssets(); } catch { S.assets = []; }
+  S.reached = 3; setTab("blog"); show(3); makeBlog(); makeCar();
 });
 $("to4").addEventListener("click", async () => {
-  $("fTitle").value = S.draft.title; $("fBody").value = bodyWithSlots(); show(4);
+  $("fTitle").value = S.draft.title; $("fBody").value = bodyWithSlots(); $("blogReview").hidden = false; $("blogReview").scrollIntoView({block: "start"});
+  renderBlogImgs();
   $("preview").innerHTML = previewHtml($("fTitle").value, $("fBody").value);
   try { const r = await check($("fTitle"), $("fBody"), S.target, $("report4"), false); gate(r); } catch (e) { fail(e); }
 });
 function gate(r) {
-  $("download").disabled = $("copy").disabled = r.counts.fail > 0;
+  $("download").disabled = $("copy").disabled = $("copyRich").disabled = r.counts.fail > 0;
   $("preview").innerHTML = previewHtml($("fTitle").value, $("fBody").value);
   $("dlHint").textContent = r.counts.fail > 0 ? `실패 ${r.counts.fail}건을 고치면 내려받을 수 있습니다.` : (r.counts.check ? "확인 필요 항목은 담당자가 읽어 보고 결정합니다." : "");
 }
@@ -336,20 +559,27 @@ $("copy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(`${$("fTitle").value}\n\n${$("fBody").value}`); $("dlHint").textContent = "글을 복사했습니다."; }
   catch { $("dlHint").textContent = "복사하지 못했습니다. 본문 칸에서 직접 복사해 주세요."; }
 });
+$("copyRich").addEventListener("click", async () => {
+  const html = richHtml($("fTitle").value, $("fBody").value);
+  try {
+    await navigator.clipboard.write([new ClipboardItem({"text/html": new Blob([html], {type: "text/html"}), "text/plain": new Blob([`${$("fTitle").value}\n\n${$("fBody").value}`], {type: "text/plain"})})]);
+    $("dlHint").textContent = "서식과 함께 복사했습니다. 블로그 글쓰기 창에 붙여 넣으세요.";
+  } catch { $("dlHint").textContent = "서식 복사를 지원하지 않는 브라우저입니다. [글 복사]를 써 주세요."; }
+});
 $("planBtn").addEventListener("click", () => {
   const description = $("customTarget").value.trim();
   if (description.length < 2) { fail(new Error("어떤 고객인지 두 글자 이상 적어 주세요.")); return; }
-  busy($("planBtn"), "AI가 묶음을 고르는 중… (1분쯤)", async () => {
+  busy($("planBtn"), "AI가 타깃을 만드는 중… (20초쯤)", async () => {
     const target = await post("/api/targets/plan", {description});
     if (!S.state.targets.some((t) => t.id === target.id)) S.state.targets.push(target);
-    S.target = target.id; S.reached = 1; S.draft = null; renderTargets(); $("to2").disabled = false;
-    if (await loadBundle()) show(2);
+    S.target = target.id; S.reached = 1; S.draft = null; S.must = []; renderTargets(); $("to2").disabled = false; $("customTarget").value = "";
   });
 });
-$("fBody").addEventListener("input", () => { $("download").disabled = $("copy").disabled = true; $("dlHint").textContent = "글이 바뀌었습니다. 다시 검수해 주세요."; });
-$("fTitle").addEventListener("input", () => { $("download").disabled = $("copy").disabled = true; $("dlHint").textContent = "글이 바뀌었습니다. 다시 검수해 주세요."; });
+$("fBody").addEventListener("input", () => { $("download").disabled = $("copy").disabled = $("copyRich").disabled = true; $("dlHint").textContent = "글이 바뀌었습니다. 다시 검수해 주세요."; });
+$("fTitle").addEventListener("input", () => { $("download").disabled = $("copy").disabled = $("copyRich").disabled = true; $("dlHint").textContent = "글이 바뀌었습니다. 다시 검수해 주세요."; });
 $("download").addEventListener("click", () => {
-  const blob = new Blob([`# ${$("fTitle").value}\n\n${$("fBody").value}\n`], {type: "text/markdown;charset=utf-8"});
+  const withImgs = $("fBody").value.split("\n").map((line) => { const a = line.trim().startsWith("■") ? S.assets.find((x) => x.id === S.blogImg[line.trim().slice(1).trim()]) : null; return a ? `${line}\n(여기에 이미지: ${a.filename} · ${a.caption})` : line; }).join("\n");
+  const blob = new Blob([`# ${$("fTitle").value}\n\n${withImgs}\n`], {type: "text/markdown;charset=utf-8"});
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "factlock-draft.md"; a.click(); URL.revokeObjectURL(a.href);
 });
 $("pCheck").addEventListener("click", () => {
@@ -371,7 +601,7 @@ function renderFacts() {
   const q = $("factQ").value.trim().toLowerCase();
   const rows = S.facts.filter((f) => !q || (f.id + f.statement + f.source).toLowerCase().includes(q));
   rows.sort((x, y) => (y.status === "pending") - (x.status === "pending"));
-  $("facts").innerHTML = rows.map((f) => `<tr><td class="small">${esc(f.id)}</td><td>${esc(f.statement)}${f.id.startsWith("DOC-") ? `<br>${f.status === "pending" ? `<button class="ghost" data-confirm="${esc(f.id)}">확정</button>` : ""}<button class="ghost" data-discard="${esc(f.id)}">지우기</button>` : ""}</td><td><span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span></td><td class="small">${src(f)}</td></tr>`).join("") || `<tr><td colspan="4" class="small">찾는 사실이 없습니다.</td></tr>`;
+  $("facts").innerHTML = rows.map((f) => `<tr><td class="small">${esc(f.id)}</td><td>${esc(f.statement)}${/^(DOC|USER)-/.test(f.id) ? `<br>${f.status === "pending" ? `<button class="ghost" data-confirm="${esc(f.id)}">확정</button>` : ""}<button class="ghost" data-discard="${esc(f.id)}">지우기</button>` : ""}</td><td><span class="tag ${STATUS[f.status][1]}">${STATUS[f.status][0]}</span></td><td class="small">${src(f)}</td></tr>`).join("") || `<tr><td colspan="4" class="small">찾는 사실이 없습니다.</td></tr>`;
   const c = {confirmed: 0, conflict: 0, claim: 0, pending: 0}; S.facts.forEach((f) => c[f.status]++);
   $("factStat").innerHTML = `<div><span class="small">확정</span><b>${c.confirmed}</b></div><div><span class="small">확정 대기</span><b style="color:var(--warn)">${c.pending}</b></div><div><span class="small">확인 필요</span><b style="color:var(--bad)">${c.conflict}</b></div><div><span class="small">회사 주장</span><b style="color:var(--warn)">${c.claim}</b></div>`;
   $("facts").querySelectorAll("[data-confirm]").forEach((b) => b.addEventListener("click", async () => { try { await api(`/api/facts/${b.dataset.confirm}/confirm`, {method: "POST"}); await loadFacts(); } catch (e) { fail(e); } }));
@@ -394,6 +624,7 @@ $("factQ").addEventListener("input", renderFacts);
 document.querySelectorAll(".steps button").forEach((b) => b.addEventListener("click", async () => {
   const n = Number(b.dataset.step);
   if (n === 6) { try { await loadFacts(); } catch (e) { fail(e); return; } }
+  if (n === 7) { try { await loadAssets(); renderAssets(); } catch (e) { fail(e); return; } }
   show(n);
 }));
 init().catch(fail);

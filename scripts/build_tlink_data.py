@@ -564,10 +564,11 @@ FACTS = [
     fact(
         "PRICE-MOBILE",
         "price",
-        "티링크 모바일 이용료는 1 USER 20,000원으로 안내되어 있으나, A·B·C 타입 요금과의 관계는 자료에 없습니다.",
+        "티링크 모바일 이용료는 1 USER 20,000원입니다.",
         f"{SITE} 티링크 모바일",
         values=won(20_000),
         anchors=["1 USER", "USER"],
+        scope="(A·B·C 타입 요금과의 관계는 자료에 없습니다.)",
     ),
     # conditions
     fact("COND-VAT", "condition", "가격은 부가세 별도입니다.", CENTER, markers=["부가세 별도", "VAT 별도"]),

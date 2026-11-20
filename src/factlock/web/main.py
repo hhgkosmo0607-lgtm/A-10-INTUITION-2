@@ -4,6 +4,7 @@ FACTLOCK_AI chooses the AI engine: auto (default), claude-cli, codex-cli, api, o
 "auto" tries the Claude API key if set, then the Claude Code CLI, then the Codex CLI.
 """
 
+import json
 import os
 from pathlib import Path
 
@@ -11,11 +12,18 @@ import anthropic
 from fastapi import FastAPI
 
 from factlock.adapters.ai_json import ClaudeApiJson, ClaudeCliJson, CodexCliJson, FirstAvailableJson
-from factlock.adapters.ai_steps import AiDraftWriter, AiFactExtractor, AiMeaningReviewer, AiTargetPlanner
+from factlock.adapters.ai_steps import (
+    AiCarouselWriter,
+    AiDraftWriter,
+    AiFactExtractor,
+    AiMeaningReviewer,
+    AiTargetPlanner,
+)
+from factlock.adapters.asset_store import FileAssetStore
 from factlock.adapters.extra_facts import JsonExtraFacts
 from factlock.adapters.json_repo import JsonCompanyData
 from factlock.adapters.sqlite_store import SqliteDraftStore
-from factlock.adapters.stored_writer import StoredDraftWriter
+from factlock.adapters.stored_writer import StoredCarouselWriter, StoredDraftWriter
 from factlock.adapters.xlsx_guideline import XlsxGuidelineReader
 from factlock.application.service import FactLockService
 from factlock.ports import JsonModel
@@ -53,8 +61,13 @@ def build() -> FastAPI:
         AiMeaningReviewer(engine) if engine else None,
         AiFactExtractor(engine) if engine else None,
         JsonExtraFacts(Path(os.environ.get("FACTLOCK_EXTRA_FACTS", ROOT / "var" / "extra_facts.json"))),
+        AiCarouselWriter(writer) if writer else None,
+        StoredCarouselWriter(folder / "carousels"),
     )
-    return create_app(service, XlsxGuidelineReader(), engine.name if engine else "")
+    brand_file = folder / "brand.json"
+    brand = json.loads(brand_file.read_text(encoding="utf-8")) if brand_file.is_file() else None
+    assets = FileAssetStore(Path(os.environ.get("FACTLOCK_ASSETS", ROOT / "var" / "assets")))
+    return create_app(service, XlsxGuidelineReader(), engine.name if engine else "", brand, assets)
 
 
 app = build()

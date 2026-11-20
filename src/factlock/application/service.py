@@ -6,8 +6,10 @@ from collections.abc import Sequence
 from dataclasses import dataclass, replace
 
 from factlock.domain.extract import contains, extract_values, is_checked
-from factlock.domain.lock import lock_draft, render_body
+from factlock.domain.lock import BODY_MAX, HEADLINE_MAX, carousel_text, lock_carousel, lock_draft, render_body
 from factlock.domain.models import (
+    Block,
+    Carousel,
     Draft,
     DraftRequest,
     Dropped,
@@ -24,9 +26,10 @@ from factlock.domain.models import (
     Verdict,
 )
 from factlock.domain.quote import build_quote
-from factlock.domain.review import review
+from factlock.domain.review import must_include_result, review
 from factlock.ports import (
     AiError,
+    CarouselWriter,
     DraftStore,
     DraftWriter,
     DraftWriterError,
@@ -38,6 +41,7 @@ from factlock.ports import (
 
 USABLE_KINDS_FOR_WRITING = ("product", "feature", "number", "price", "condition", "pain", "phrase", "company")
 MAX_PRODUCTS = 4
+ADDED = ("DOC-", "USER-")  # facts added on this computer: read from documents or typed by the marketer
 DOC_KINDS = ("product", "feature", "number", "price", "condition", "company")
 CHUNK_CHARS = 12_000
 MAX_CHUNKS = 5
@@ -71,6 +75,18 @@ class Ingested:
     pages_skipped: int
 
 
+@dataclass(frozen=True)
+class CarouselResult:
+    carousel: Carousel
+    dropped: tuple[Dropped, ...]
+    report: ReviewReport
+    fallback_code: str
+
+
+MIN_SLIDES = 3
+MAX_SLIDES = 10  # Instagram shows at most ten cards the same way everywhere
+
+
 class UnknownTarget(Exception):
     pass
 
@@ -100,7 +116,11 @@ class FactLockService:
         reviewer: MeaningReviewer | None = None,
         extractor: FactExtractor | None = None,
         extra_store: ExtraFactStore | None = None,
+        live_carousel: CarouselWriter | None = None,
+        stored_carousel: CarouselWriter | None = None,
     ) -> None:
+        self._live_carousel = live_carousel
+        self._stored_carousel = stored_carousel
         self._extra_store = extra_store
         self._extractor = extractor
         extra = extra_store.load() if extra_store else []
@@ -153,7 +173,7 @@ class FactLockService:
             self._facts.append(fact)
         self._by_id = {f.id: f for f in self._facts}
         if self._extra_store is not None:
-            self._extra_store.save([f for f in self._facts if f.id.startswith("DOC-")])
+            self._extra_store.save([f for f in self._facts if f.id.startswith(ADDED)])
 
     def ingest_document(self, filename: str, pages: Sequence[tuple[str, str]]) -> Ingested:
         """Ask the AI for facts in a document; keep only those whose quote is really in the text.
@@ -209,16 +229,32 @@ class FactLockService:
             self._replace_fact(fact, fact.id)
         return Ingested(tuple(added), tuple(rejected), pages_read, len(pages) - pages_read)
 
+    def add_user_fact(self, statement: str) -> Fact:
+        """A fact the marketer vouches for. Recorded with 'typed by the marketer' as its source."""
+        text = " ".join(statement.split())
+        fact_id = "USER-" + hashlib.sha256(text.encode()).hexdigest()[:8].upper()
+        existing = self._by_id.get(fact_id)
+        if existing is not None:
+            return existing
+        values = tuple(dict.fromkeys(f.value for f in extract_values(text) if is_checked(f.value)))
+        source = Source("담당자가 직접 입력", datetime.date.today().isoformat())
+        fact = Fact(fact_id, "feature", text, source, FactStatus.CONFIRMED, values)
+        self._replace_fact(fact, fact_id)
+        return fact
+
+    def _must(self, ids: Sequence[str]) -> tuple[Fact, ...]:
+        return self._pick(list(ids))[:10]
+
     def confirm_fact(self, fact_id: str) -> Fact:
         fact = self._by_id.get(fact_id)
-        if fact is None or not fact_id.startswith("DOC-"):
+        if fact is None or not fact_id.startswith(ADDED):
             raise UnknownFact(fact_id)
         confirmed = replace(fact, status=FactStatus.CONFIRMED)
         self._replace_fact(confirmed, fact_id)
         return confirmed
 
     def discard_fact(self, fact_id: str) -> None:
-        if fact_id not in self._by_id or not fact_id.startswith("DOC-"):
+        if fact_id not in self._by_id or not fact_id.startswith(ADDED):
             raise UnknownFact(fact_id)
         self._replace_fact(None, fact_id)
 
@@ -281,9 +317,39 @@ class FactLockService:
             if fact.status in (FactStatus.CONFIRMED, FactStatus.CLAIM) and fact.kind in USABLE_KINDS_FOR_WRITING
         )
 
-    def make_draft(self, target_id: str, live: bool = True) -> DraftResult:
+    def _request(self, target: Target, include_price: bool, must: Sequence[Fact] = ()) -> DraftRequest:
+        """What a writer may see. Without prices, price facts and conditions only prices need are withheld."""
+        facts = self.writable_facts()
+        if include_price:
+            return DraftRequest(target, self.guideline, facts, True, tuple(f.id for f in must))
+        hidden = self._price_only_ids(target) - {f.id for f in must}
+        visible = tuple(f for f in facts if f.id not in hidden)
+        return DraftRequest(replace(target, quote_items=()), self.guideline, visible, False, tuple(f.id for f in must))
+
+    def _price_only_ids(self, target: Target) -> set[str]:
+        prices = [f for f in self._facts if f.kind == "price"]
+        needed_elsewhere = {c for f in self._facts if f.kind != "price" for c in f.requires} | set(
+            target.must_conditions
+        )
+        return {f.id for f in prices} | ({c for f in prices for c in f.requires} - needed_elsewhere)
+
+    def _without_price_blocks(self, blocks: Sequence[Block], hidden: set[str]) -> tuple[Block, ...]:
+        kept = [b for b in blocks if not set(b.fact_ids) & hidden]
+        # Drop a heading left with nothing under it.
+        out: list[Block] = []
+        for i, block in enumerate(kept):
+            nxt = kept[i + 1].type if i + 1 < len(kept) else "end"
+            if block.type == "heading" and nxt in ("heading", "footer", "end") and "비용" in block.text:
+                continue
+            out.append(block)
+        return tuple(out)
+
+    def make_draft(
+        self, target_id: str, live: bool = True, include_price: bool = True, must_include: Sequence[str] = ()
+    ) -> DraftResult:
         target = self.target(target_id)
-        request = DraftRequest(target, self.guideline, self.writable_facts())
+        must = self._must(must_include)
+        request = self._request(target, include_price, must)
         fallback_code = "" if live else "stored_requested"
         raw: Draft | None = None
         if live and self._live is not None:
@@ -298,11 +364,68 @@ class FactLockService:
                 raw = self._stored.write(request)
             except DraftWriterError:
                 raise Unavailable(fallback_code or "stored_draft_missing") from None
+        if not include_price:
+            raw = Draft(raw.title, self._without_price_blocks(raw.blocks, self._price_only_ids(target)), raw.source)
         draft, dropped = lock_draft(raw, self._facts)
         body = render_body(draft, self.guideline, self._facts)
-        report = review(draft.title, body, self._facts, self.guideline, target)
+        report = self.review_text(draft.title, body, target.id, False, must_include)
         draft_id = self._store.save(draft, report)
         return DraftResult(draft_id, draft, body, dropped, report, fallback_code)
+
+    def review_carousel(
+        self, carousel: Carousel, target: Target | None, must_include: Sequence[str] = ()
+    ) -> ReviewReport:
+        """Number, condition, leftover and wording rules on the card and caption text, plus a card count."""
+        base = review("", carousel_text(carousel), self._facts, Guideline((), (), ()), target)
+        kept = tuple(r for r in base.results if r.rule in ("R4", "R5", "R6", "R7", "R8", "R9", "R10"))
+        count = len(carousel.slides)
+        fits = MIN_SLIDES <= count <= MAX_SLIDES
+        note = Finding(f"카드가 {count}장입니다. {MIN_SLIDES}~{MAX_SLIDES}장이 알맞습니다.")
+        cards = RuleResult("C1", "카드 장 수", Verdict.PASS if fits else Verdict.FAIL, () if fits else (note,))
+        long = [
+            Finding(f"카드 {i}의 제목이 {HEADLINE_MAX}자를 넘습니다.", s.headline.replace("\n", " "))
+            for i, s in enumerate(carousel.slides, 1)
+            if len(s.headline.replace("\n", "")) > HEADLINE_MAX
+        ] + [
+            Finding(f"카드 {i}의 본문이 {BODY_MAX}자를 넘습니다.", s.body)
+            for i, s in enumerate(carousel.slides, 1)
+            if len(s.body) > BODY_MAX
+        ]
+        length = RuleResult("C2", "카드 글자 수", Verdict.FAIL if long else Verdict.PASS, tuple(long))
+        extra = (must_include_result(carousel_text(carousel), self._must(must_include)),) if must_include else ()
+        return ReviewReport((cards, length, *kept, *extra))
+
+    def make_carousel(
+        self, target_id: str, live: bool = True, include_price: bool = True, must_include: Sequence[str] = ()
+    ) -> CarouselResult:
+        target = self.target(target_id)
+        must = self._must(must_include)
+        request = self._request(target, include_price, must)
+        fallback_code = "" if live else "stored_requested"
+        raw: Carousel | None = None
+        if live and self._live_carousel is not None:
+            try:
+                raw = self._live_carousel.write_carousel(request)
+            except DraftWriterError as error:
+                fallback_code = error.code
+        elif live:
+            fallback_code = "live_writer_not_configured"
+        if raw is None:
+            if self._stored_carousel is None:
+                raise Unavailable(fallback_code or "stored_draft_missing")
+            try:
+                raw = self._stored_carousel.write_carousel(request)
+            except DraftWriterError:
+                raise Unavailable(fallback_code or "stored_draft_missing") from None
+        if not include_price:
+            hidden = self._price_only_ids(target)
+            slides = [s for s in raw.slides if not set(s.fact_ids) & hidden]
+            if raw.offer_without_price is not None and len(slides) < len(raw.slides):
+                slides.append(raw.offer_without_price)
+            caption = tuple(b for b in raw.caption if not set(b.fact_ids) & hidden)
+            raw = Carousel(tuple(slides), caption, raw.hashtags, raw.source)
+        carousel, dropped = lock_carousel(raw, self._facts)
+        return CarouselResult(carousel, dropped, self.review_carousel(carousel, target, must_include), fallback_code)
 
     def _meaning(self, title: str, body: str) -> RuleResult:
         name = "AI 의미 검수"
@@ -328,12 +451,16 @@ class FactLockService:
             return RuleResult("R11", name, Verdict.PASS)
         return RuleResult("R11", name, Verdict.CHECK, tuple(findings))
 
-    def review_text(self, title: str, body: str, target_id: str | None, ai: bool = False) -> ReviewReport:
+    def review_text(
+        self, title: str, body: str, target_id: str | None, ai: bool = False, must_include: Sequence[str] = ()
+    ) -> ReviewReport:
         target = self.target(target_id) if target_id else None
-        report = review(title, body, self._facts, self.guideline, target)
-        if not ai:
-            return report
-        return ReviewReport((*report.results, self._meaning(title, body)))
+        results = list(review(title, body, self._facts, self.guideline, target).results)
+        if must_include:
+            results.append(must_include_result(f"{title}\n{body}", self._must(must_include)))
+        if ai:
+            results.append(self._meaning(title, body))
+        return ReviewReport(tuple(results))
 
     def use_guideline(self, uploaded: Guideline) -> Guideline:
         """Adopt an uploaded guideline, keeping detection terms already confirmed for the same item."""

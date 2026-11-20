@@ -81,7 +81,11 @@ def test_unknown_target_is_404_with_code(tmp_path: Path) -> None:
 
 def test_live_draft_drops_unbacked_sentence(tmp_path: Path) -> None:
     writer = FakeWriter()
-    data = make_client(tmp_path, writer).post("/api/drafts", json={"target_id": "field-sales"}).json()
+    data = (
+        make_client(tmp_path, writer)
+        .post("/api/drafts", json={"target_id": "field-sales", "include_price": True})
+        .json()
+    )
     assert data["source"] == "claude"
     assert len(data["dropped"]) == 1
     assert "9,900원" in data["dropped"][0]["reason"]
@@ -92,7 +96,7 @@ def test_live_draft_drops_unbacked_sentence(tmp_path: Path) -> None:
 
 def test_live_failure_falls_back_to_stored_draft(tmp_path: Path) -> None:
     client = make_client(tmp_path, FakeWriter(fail="claude_unreachable"))
-    data = client.post("/api/drafts", json={"target_id": "field-sales"}).json()
+    data = client.post("/api/drafts", json={"target_id": "field-sales", "include_price": True}).json()
     assert data["source"] == "stored"
     assert data["fallback_code"] == "claude_unreachable"
     assert data["dropped"] == []
@@ -101,7 +105,7 @@ def test_live_failure_falls_back_to_stored_draft(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize("target", ["field-sales", "remote-callcenter"])
 def test_stored_drafts_survive_the_fact_lock(tmp_path: Path, target: str) -> None:
-    data = make_client(tmp_path, None).post("/api/drafts", json={"target_id": target}).json()
+    data = make_client(tmp_path, None).post("/api/drafts", json={"target_id": target, "include_price": True}).json()
     assert data["dropped"] == []
     failed = [r["rule"] for r in data["report"]["results"] if r["verdict"] == "fail"]
     assert failed == ["R8"]

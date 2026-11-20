@@ -4,11 +4,13 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from factlock.adapters.asset_store import MAX_BYTES as MAX_ASSET
+from factlock.adapters.asset_store import AssetError, FileAssetStore
 from factlock.adapters.doc_text import MAX_BYTES, read_document
 from factlock.application.service import FactLockService, Unavailable, UnknownFact, UnknownTarget
 from factlock.domain.models import Fact, ReviewReport
@@ -43,6 +45,12 @@ DOCUMENT_MESSAGES = {
     "document_unreadable": "파일을 읽지 못했습니다. 암호가 걸렸거나 손상된 파일일 수 있습니다.",
     "document_has_no_text": "글자를 찾지 못했습니다. 그림으로만 된 문서일 수 있습니다.",
 }
+ASSET_MESSAGES = {
+    "asset_too_large": "이미지가 10MB를 넘습니다.",
+    "asset_type_unsupported": "PNG, JPG, WEBP 이미지만 넣을 수 있습니다.",
+    "asset_caption_missing": "무엇이 보이는 이미지인지 설명을 두 글자 이상 적어 주세요.",
+    "asset_library_full": "자료함이 가득 찼습니다. 쓰지 않는 자료를 지워 주세요.",
+}
 AI_DEFAULT = "AI가 답하지 못했습니다. 잠시 뒤 다시 시도해 주세요."
 
 
@@ -58,6 +66,22 @@ class BundleIn(BaseModel):
 class DraftIn(BaseModel):
     target_id: str
     live: bool = True
+    include_price: bool = False
+    must_include: list[str] = Field(default_factory=list, max_length=10)
+
+
+class SlideIn(BaseModel):
+    kicker: str = Field(max_length=40)
+    headline: str = Field(max_length=120)
+    body: str = Field(max_length=400)
+
+
+class CarouselReviewIn(BaseModel):
+    target_id: str | None = None
+    slides: list[SlideIn] = Field(max_length=10)
+    caption: str = Field(max_length=5000)
+    hashtags: list[str] = Field(max_length=40)
+    must_include: list[str] = Field(default_factory=list, max_length=10)
 
 
 class ReviewIn(BaseModel):
@@ -65,6 +89,11 @@ class ReviewIn(BaseModel):
     body: str = Field(max_length=60_000)
     target_id: str | None = None
     ai: bool = False
+    must_include: list[str] = Field(default_factory=list, max_length=10)
+
+
+class UserFactIn(BaseModel):
+    statement: str = Field(min_length=4, max_length=200)
 
 
 class PlanIn(BaseModel):
@@ -96,7 +125,13 @@ def _bad_target() -> HTTPException:
     return HTTPException(404, {"code": "unknown_target", "message": "없는 타깃입니다."})
 
 
-def create_app(service: FactLockService, reader: GuidelineReader, engine_name: str = "") -> FastAPI:
+def create_app(
+    service: FactLockService,
+    reader: GuidelineReader,
+    engine_name: str = "",
+    brand: dict[str, str] | None = None,
+    assets: FileAssetStore | None = None,
+) -> FastAPI:
     app = FastAPI(title="FactLock", docs_url=None, redoc_url=None)
 
     def guideline_view() -> dict[str, Any]:
@@ -122,6 +157,7 @@ def create_app(service: FactLockService, reader: GuidelineReader, engine_name: s
         return {
             "live": service.live_available,
             "engine": engine_name,
+            "brand": brand or {"name": "", "background": "#1c1b19", "text": "#ffffff", "accent": "#9fc1ff"},
             "targets": [{"id": t.id, "name": t.name, "status": t.status} for t in service.targets],
             "guideline": guideline_view(),
             "fact_counts": {
@@ -133,6 +169,42 @@ def create_app(service: FactLockService, reader: GuidelineReader, engine_name: s
     @app.get("/api/facts")
     def facts() -> list[dict[str, Any]]:
         return [_fact(fact) for fact in service.facts]
+
+    def asset_view(asset: Any) -> dict[str, str]:
+        return {
+            "id": asset.id,
+            "caption": asset.caption,
+            "filename": asset.filename,
+            "url": f"/api/assets/{asset.id}/file",
+        }
+
+    @app.get("/api/assets")
+    def list_assets() -> list[dict[str, str]]:
+        return [asset_view(a) for a in assets.all()] if assets else []
+
+    @app.post("/api/assets")
+    async def add_asset(file: UploadFile = File(...), caption: str = Form("")) -> dict[str, str]:  # noqa: B008
+        if assets is None:
+            raise HTTPException(503, {"code": "assets_off", "message": "자료함을 쓸 수 없습니다."})
+        data = await file.read(MAX_ASSET + 1)
+        try:
+            return asset_view(assets.add(file.filename or "image", data, caption))
+        except AssetError as error:
+            message = ASSET_MESSAGES.get(error.code, "이미지를 넣지 못했습니다.")
+            raise HTTPException(400, {"code": error.code, "message": message}) from None
+
+    @app.get("/api/assets/{asset_id}/file")
+    def asset_file(asset_id: str) -> FileResponse:
+        found = assets.get(asset_id) if assets else None
+        if found is None:
+            raise HTTPException(404, {"code": "unknown_asset", "message": "없는 자료입니다."})
+        return FileResponse(found[1], media_type=found[0].content_type)
+
+    @app.delete("/api/assets/{asset_id}")
+    def delete_asset(asset_id: str) -> dict[str, str]:
+        if assets is None or not assets.delete(asset_id):
+            raise HTTPException(404, {"code": "unknown_asset", "message": "없는 자료입니다."})
+        return {"deleted": asset_id}
 
     @app.post("/api/documents")
     async def documents(file: UploadFile = File(...)) -> dict[str, Any]:  # noqa: B008
@@ -152,6 +224,10 @@ def create_app(service: FactLockService, reader: GuidelineReader, engine_name: s
             "pages_read": result.pages_read,
             "pages_skipped": result.pages_skipped,
         }
+
+    @app.post("/api/facts")
+    def add_fact(body: UserFactIn) -> dict[str, Any]:
+        return _fact(service.add_user_fact(body.statement))
 
     @app.post("/api/facts/{fact_id}/confirm")
     def confirm(fact_id: str) -> dict[str, Any]:
@@ -210,7 +286,7 @@ def create_app(service: FactLockService, reader: GuidelineReader, engine_name: s
     @app.post("/api/drafts")
     def drafts(body: DraftIn) -> dict[str, Any]:
         try:
-            result = service.make_draft(body.target_id, body.live)
+            result = service.make_draft(body.target_id, body.live, body.include_price, body.must_include)
         except UnknownTarget:
             raise _bad_target() from None
         except Unavailable as error:
@@ -230,10 +306,47 @@ def create_app(service: FactLockService, reader: GuidelineReader, engine_name: s
             "report": _report(result.report),
         }
 
+    @app.post("/api/carousel")
+    def carousel(body: DraftIn) -> dict[str, Any]:
+        try:
+            result = service.make_carousel(body.target_id, body.live, body.include_price, body.must_include)
+        except UnknownTarget:
+            raise _bad_target() from None
+        except Unavailable as error:
+            raise HTTPException(503, {"code": error.code, "message": ai_message(error.code)}) from None
+        used = {i for s in result.carousel.slides for i in s.fact_ids}
+        used |= {i for b in result.carousel.caption for i in b.fact_ids}
+        by_id = {fact.id: fact for fact in service.facts}
+        return {
+            "source": result.carousel.source,
+            "fallback_message": ai_message(result.fallback_code),
+            "slides": [asdict(s) for s in result.carousel.slides],
+            "caption": [asdict(b) for b in result.carousel.caption],
+            "hashtags": list(result.carousel.hashtags),
+            "dropped": [asdict(item) for item in result.dropped],
+            "facts": {i: _fact(by_id[i]) for i in sorted(used) if i in by_id},
+            "report": _report(result.report),
+        }
+
+    @app.post("/api/carousel/review")
+    def carousel_review(body: CarouselReviewIn) -> dict[str, Any]:
+        from factlock.domain.models import Block, Carousel, Slide
+
+        edited = Carousel(
+            tuple(Slide(s.kicker, s.headline, s.body) for s in body.slides),
+            tuple(Block("sentence", line) for line in body.caption.splitlines() if line.strip()),
+            tuple(body.hashtags),
+        )
+        try:
+            target = service.target(body.target_id) if body.target_id else None
+        except UnknownTarget:
+            raise _bad_target() from None
+        return _report(service.review_carousel(edited, target, body.must_include))
+
     @app.post("/api/review")
     def review(body: ReviewIn) -> dict[str, Any]:
         try:
-            return _report(service.review_text(body.title, body.body, body.target_id, body.ai))
+            return _report(service.review_text(body.title, body.body, body.target_id, body.ai, body.must_include))
         except UnknownTarget:
             raise _bad_target() from None
 
