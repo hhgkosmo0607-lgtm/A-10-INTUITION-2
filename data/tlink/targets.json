@@ -1,0 +1,45 @@
+[
+  {
+    "id": "field-sales",
+    "name": "외근 영업 조직",
+    "pains": [
+      "PAIN-MOBILE",
+      "PAIN-NO-RECORD"
+    ],
+    "bundle": [
+      "PROD-MOBILE",
+      "PROD-RECORDING",
+      "PROD-CRM",
+      "PROD-REPORT"
+    ],
+    "quote_items": [
+      "PRICE-A",
+      "PRICE-REPORT",
+      "PRICE-MOBILE"
+    ],
+    "must_conditions": [
+      "COND-ANDROID"
+    ],
+    "status": "proposed"
+  },
+  {
+    "id": "remote-callcenter",
+    "name": "재택 콜센터",
+    "pains": [
+      "PAIN-REMOTE",
+      "PAIN-PHONE-SET"
+    ],
+    "bundle": [
+      "PROD-PCPHONE",
+      "PROD-BIZ",
+      "PROD-RECORDING"
+    ],
+    "quote_items": [
+      "PRICE-A",
+      "PRICE-IVR",
+      "PRICE-CALLBACK"
+    ],
+    "must_conditions": [],
+    "status": "proposed"
+  }
+]
