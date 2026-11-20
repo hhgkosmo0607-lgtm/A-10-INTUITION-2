@@ -85,6 +85,9 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
 .checks input{margin-top:5px;flex:none}
 .checks .warn{color:var(--bad);font-size:13px}
 .addrow{margin-top:8px}.addrow input{flex:1 1 300px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{border:0;background:none;font:inherit;padding:8px 20px;cursor:pointer;color:var(--sub)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff;font-weight:600}
 [hidden]{display:none!important}
 @media (max-width:760px){
   .shell{grid-template-columns:minmax(0,1fr)}
@@ -155,8 +158,12 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <div id="mustFound"></div>
     <div class="row addrow"><input type="text" id="mustNew" placeholder="내용 직접 추가 (예: 12월 한 달 동안 설치 상담을 무료로 진행합니다.)" maxlength="200" aria-label="내용 직접 추가"><button class="ghost" id="mustAdd">추가</button></div>
     <p class="small">직접 추가한 항목은 출처가 '담당자가 직접 입력'으로 사실 목록에 기록되고, 담당자가 책임지는 사실로 취급됩니다.</p>
-    <h3>가격 <span class="small">(선택)</span></h3>
-    <div class="row"><label><input type="checkbox" id="incPrice"> 글에 가격 넣기</label><span class="small">광고 글에는 보통 가격을 넣지 않습니다. 넣으면 부가세 별도·예시 견적 같은 조건이 함께 들어갑니다.</span></div>
+    <h3>가격</h3>
+    <div class="row">
+      <div class="seg" role="group" aria-label="가격 추가 여부"><button type="button" id="priceOff" aria-pressed="true">미추가</button><button type="button" id="priceOn" aria-pressed="false">추가</button></div>
+      <span class="small" id="priceNote">광고 글에는 보통 가격을 넣지 않습니다.</span>
+      <input type="checkbox" id="incPrice" hidden>
+    </div>
     <div id="quoteBox" hidden>
     <p class="sub" style="margin-top:8px">글에 들어갈 가격의 근거입니다. 상담원 수를 바꾸면 예시 견적을 다시 계산합니다.</p>
     <div class="row"><label for="agents">상담원 수</label><input type="number" id="agents" min="1" max="10000" value="5" style="width:100px"><button class="ghost" id="recalc">재계산</button></div>
@@ -521,7 +528,12 @@ async function check(titleEl, bodyEl, target, out, ai) {
 
 $("to2").addEventListener("click", async () => { try { if (await loadBundle()) show(2); } catch (e) { fail(e); } });
 $("recalc").addEventListener("click", () => loadBundle().catch(fail));
-$("incPrice").addEventListener("change", () => { $("quoteBox").hidden = !$("incPrice").checked; });
+function setPrice(on) {
+  $("incPrice").checked = on; $("quoteBox").hidden = !on;
+  $("priceOn").setAttribute("aria-pressed", String(on)); $("priceOff").setAttribute("aria-pressed", String(!on));
+  $("priceNote").textContent = on ? "가격과 함께 부가세 별도·예시 견적 같은 조건이 글에 들어갑니다." : "광고 글에는 보통 가격을 넣지 않습니다.";
+}
+$("priceOn").addEventListener("click", () => setPrice(true)); $("priceOff").addEventListener("click", () => setPrice(false));
 function wrapLines(ctx, text, maxWidth) {
   const out = [];
   for (const para of String(text).split("\n")) {
