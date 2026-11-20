@@ -1,6 +1,7 @@
 """Targets: the ready-made ones, the ones an AI plans from a description, and what each brings."""
 
 from collections.abc import Sequence
+from dataclasses import replace
 
 from factlock.application.catalog import FactCatalog, short_hash
 from factlock.application.results import Bundle, Unavailable, UnknownTarget
@@ -79,4 +80,20 @@ class TargetBook:
             pick(list(condition_ids)),
             quote,
             self._reasons.get(target.id, ""),
+            tuple(self._catalog.from_marketer("pain")),
+            tuple(self._catalog.from_marketer("condition")),
+            tuple(self._catalog.from_marketer("feature")),
         )
+
+    def tailored(
+        self, target_id: str, pains: Sequence[str] | None = None, conditions: Sequence[str] | None = None
+    ) -> Target:
+        """The target with the marketer's own choice of customer problems and notices, when given."""
+        target = self.get(target_id)
+        pick = self._catalog.pick
+        if pains is not None:
+            target = replace(target, pains=tuple(fact.id for fact in pick(list(pains), "pain")))
+        if conditions is not None:
+            chosen = tuple(fact.id for fact in pick(list(conditions), "condition") if fact.markers)
+            target = replace(target, must_conditions=chosen)
+        return target

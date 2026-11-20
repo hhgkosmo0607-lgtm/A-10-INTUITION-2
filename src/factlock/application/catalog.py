@@ -14,6 +14,7 @@ USABLE = (FactStatus.CONFIRMED, FactStatus.CLAIM)
 WRITABLE_KINDS = ("product", "feature", "number", "price", "condition", "pain", "phrase", "company")
 ADDED = ("DOC-", "USER-")  # facts added on this computer: read from documents or typed by the marketer
 MAX_MUST_INCLUDE = 10
+MARKETER_KINDS = ("pain", "condition", "feature")  # customer problem, notice, content to include
 
 
 def checked_values(text: str) -> tuple[Value, ...]:
@@ -74,15 +75,21 @@ class FactCatalog:
         self._sync()
         return len(gone)
 
-    def add_from_marketer(self, statement: str) -> Fact:
+    def from_marketer(self, kind: str) -> list[Fact]:
+        """What the marketer typed before, so it can be picked again."""
+        return [fact for fact in self._facts if fact.id.startswith("USER-") and fact.kind == kind]
+
+    def add_from_marketer(self, statement: str, kind: str = "feature") -> Fact:
         """A fact the marketer vouches for. Recorded with 'typed by the marketer' as its source."""
         text = " ".join(statement.split())
-        fact_id = "USER-" + short_hash(text)
+        if kind not in MARKETER_KINDS:
+            kind = "feature"
+        fact_id = "USER-" + short_hash(f"{kind}:{text}")
         existing = self._by_id.get(fact_id)
         if existing is not None:
             return existing
         source = Source("담당자가 직접 입력", datetime.date.today().isoformat())
-        fact = Fact(fact_id, "feature", text, source, FactStatus.CONFIRMED, checked_values(text))
+        fact = Fact(fact_id, kind, text, source, FactStatus.CONFIRMED, checked_values(text))
         self.put(fact)
         return fact
 

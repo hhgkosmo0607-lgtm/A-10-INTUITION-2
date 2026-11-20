@@ -13,6 +13,9 @@ class Bundle:
     conditions: tuple[Fact, ...]
     quote: Quote
     reason: str = ""
+    saved_pains: tuple[Fact, ...] = ()  # typed by the marketer earlier, offered for reuse
+    saved_conditions: tuple[Fact, ...] = ()
+    saved_content: tuple[Fact, ...] = ()
 
 
 @dataclass(frozen=True)

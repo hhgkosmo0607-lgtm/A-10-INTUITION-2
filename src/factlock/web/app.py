@@ -47,6 +47,8 @@ class DraftIn(BaseModel):
     live: bool = True
     include_price: bool = False
     must_include: list[str] = Field(default_factory=list, max_length=10)
+    pains: list[str] | None = Field(default=None, max_length=10)
+    conditions: list[str] | None = Field(default=None, max_length=20)
 
 
 class SlideIn(BaseModel):
@@ -61,6 +63,7 @@ class CarouselReviewIn(BaseModel):
     caption: str = Field(max_length=5000)
     hashtags: list[str] = Field(max_length=40)
     must_include: list[str] = Field(default_factory=list, max_length=10)
+    conditions: list[str] | None = Field(default=None, max_length=20)
 
 
 class ReviewIn(BaseModel):
@@ -69,10 +72,12 @@ class ReviewIn(BaseModel):
     target_id: str | None = None
     ai: bool = False
     must_include: list[str] = Field(default_factory=list, max_length=10)
+    conditions: list[str] | None = Field(default=None, max_length=20)
 
 
 class UserFactIn(BaseModel):
     statement: str = Field(min_length=4, max_length=200)
+    kind: str = Field(default="feature", pattern="^(pain|condition|feature)$")
 
 
 class PlanIn(BaseModel):
@@ -250,7 +255,7 @@ def create_app(
 
     @app.post("/api/facts")
     def add_fact(body: UserFactIn) -> dict[str, Any]:
-        return _fact(service.add_user_fact(body.statement))
+        return _fact(service.add_user_fact(body.statement, body.kind))
 
     @app.post("/api/facts/{fact_id}/confirm")
     def confirm(fact_id: str) -> dict[str, Any]:
@@ -284,6 +289,11 @@ def create_app(
             "conditions": [_fact(f) for f in result.conditions],
             "quote": asdict(result.quote),
             "reason": result.reason,
+            "saved": {
+                "pains": [_fact(f) for f in result.saved_pains],
+                "conditions": [_fact(f) for f in result.saved_conditions],
+                "content": [_fact(f) for f in result.saved_content],
+            },
         }
 
     @app.post("/api/targets/plan")
@@ -309,7 +319,9 @@ def create_app(
     @app.post("/api/drafts")
     def drafts(body: DraftIn) -> dict[str, Any]:
         try:
-            result = service.make_draft(body.target_id, body.live, body.include_price, body.must_include)
+            result = service.make_draft(
+                body.target_id, body.live, body.include_price, body.must_include, body.pains, body.conditions
+            )
         except UnknownTarget:
             raise _bad_target() from None
         except Unavailable as error:
@@ -332,7 +344,9 @@ def create_app(
     @app.post("/api/carousel")
     def carousel(body: DraftIn) -> dict[str, Any]:
         try:
-            result = service.make_carousel(body.target_id, body.live, body.include_price, body.must_include)
+            result = service.make_carousel(
+                body.target_id, body.live, body.include_price, body.must_include, body.pains, body.conditions
+            )
         except UnknownTarget:
             raise _bad_target() from None
         except Unavailable as error:
@@ -359,7 +373,7 @@ def create_app(
             tuple(body.hashtags),
         )
         try:
-            target = service.target(body.target_id) if body.target_id else None
+            target = service.tailored_target(body.target_id, body.conditions) if body.target_id else None
         except UnknownTarget:
             raise _bad_target() from None
         return _report(service.review_carousel(edited, target, body.must_include))
@@ -367,7 +381,9 @@ def create_app(
     @app.post("/api/review")
     def review(body: ReviewIn) -> dict[str, Any]:
         try:
-            return _report(service.review_text(body.title, body.body, body.target_id, body.ai, body.must_include))
+            return _report(
+                service.review_text(body.title, body.body, body.target_id, body.ai, body.must_include, body.conditions)
+            )
         except UnknownTarget:
             raise _bad_target() from None
 

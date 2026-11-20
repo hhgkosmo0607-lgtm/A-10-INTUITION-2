@@ -213,3 +213,41 @@ def test_facts_link_only_to_public_pages(tmp_path: Path) -> None:
     assert facts["COND-ANDROID"]["quote"] == "아이폰 사용 불가"
     assert facts["PROD-NAME"]["url"] == ""  # the guideline is a received file, not an online page
     assert all(f["url"] == "" or f["url"].startswith("https://") for f in facts.values())
+
+
+class SeeingWriter(FakeWriter):
+    def write(self, request: DraftRequest) -> Draft:
+        self.seen = request
+        return super().write(request)
+
+
+def test_marketer_chooses_problems_and_notices_and_can_reuse_typed_ones(tmp_path: Path) -> None:
+    writer = SeeingWriter()
+    c = make_client(tmp_path, writer)
+    pain = c.post(
+        "/api/facts", json={"statement": "외근 뒤 일일 보고서를 쓰느라 퇴근이 늦어집니다.", "kind": "pain"}
+    ).json()
+    note = c.post("/api/facts", json={"statement": "설치는 평일에만 진행합니다.", "kind": "condition"}).json()
+    assert pain["kind"] == "pain" and note["kind"] == "condition"
+
+    saved = c.post("/api/bundle", json={"target_id": "field-sales", "agents": 5}).json()["saved"]
+    assert [f["id"] for f in saved["pains"]] == [pain["id"]]  # offered again next time
+    assert [f["id"] for f in saved["conditions"]] == [note["id"]]
+
+    body = {"target_id": "field-sales", "pains": [pain["id"]], "conditions": [], "must_include": [note["id"]]}
+    c.post("/api/drafts", json=body)
+    assert writer.seen is not None
+    assert writer.seen.target.pains == (pain["id"],)  # only the checked problem is sent
+    assert writer.seen.target.must_conditions == ()  # the unchecked default notice is left out
+    assert writer.seen.must_include == (note["id"],)
+
+
+def test_unchecked_notice_is_still_caught_when_its_product_is_mentioned(tmp_path: Path) -> None:
+    body = "티링크 모바일은 휴대폰 녹취 파일을 중앙 서버로 전송해 보관합니다."
+    data = (
+        make_client(tmp_path, None)
+        .post("/api/review", json={"title": "t", "body": body, "target_id": "field-sales", "conditions": []})
+        .json()
+    )
+    r7 = next(r for r in data["results"] if r["rule"] == "R7")
+    assert r7["verdict"] == "fail" and "COND-ANDROID" in r7["findings"][0]["fact_ids"]
