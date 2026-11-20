@@ -147,7 +147,7 @@ def _numbers(text: str, facts: Sequence[Fact]) -> tuple[RuleResult, RuleResult, 
     return (
         _result("R4", "자료와 다른 값", mismatch),
         _result("R5", "목록에 없는 값", unknown),
-        _result("R6", "확인 필요 값", locked),
+        _result("R6", "근거 부족 값", locked),
     )
 
 
