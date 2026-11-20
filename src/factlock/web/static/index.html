@@ -170,6 +170,11 @@ select{font:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px 
     <div class="row"><label for="agents">상담원 수</label><input type="number" id="agents" min="1" max="10000" value="5" style="width:100px"><button class="ghost" id="recalc">재계산</button></div>
     <div id="quote"></div>
     </div>
+    <h3>체험 후기 칸</h3>
+    <div class="row">
+      <div class="seg" role="group" aria-label="체험 후기 칸 추가 여부"><button type="button" id="slotOff" aria-pressed="true">미추가</button><button type="button" id="slotOn" aria-pressed="false">추가</button></div>
+      <span class="small" id="slotNote">블로그 글을 자료 기반 소개 글로 만듭니다.</span>
+    </div>
     <h3>체험단 글 검수</h3>
     <div class="row">
       <div class="seg" role="group" aria-label="체험단 글 검수 추가 여부"><button type="button" id="recvOff" aria-pressed="true">미추가</button><button type="button" id="recvOn" aria-pressed="false">추가</button></div>
@@ -547,6 +552,11 @@ function setPrice(on) {
   $("priceNote").textContent = on ? "가격과 함께 부가세 별도·예시 견적 같은 조건이 글에 들어갑니다." : "광고 글에는 보통 가격을 넣지 않습니다.";
 }
 $("priceOn").addEventListener("click", () => setPrice(true)); $("priceOff").addEventListener("click", () => setPrice(false));
+function setSlot(on) {
+  S.slot = on; $("slotOn").setAttribute("aria-pressed", String(on)); $("slotOff").setAttribute("aria-pressed", String(!on));
+  $("slotNote").textContent = on ? "블로그 글에 사람이 직접 써 넣을 빈칸을 둡니다. 채우기 전에는 검수에서 실패로 나옵니다." : "블로그 글을 자료 기반 소개 글로 만듭니다.";
+}
+$("slotOn").addEventListener("click", () => setSlot(true)); $("slotOff").addEventListener("click", () => setSlot(false));
 function setRecv(on) {
   $("recvBox").hidden = !on;
   $("recvOn").setAttribute("aria-pressed", String(on)); $("recvOff").setAttribute("aria-pressed", String(!on));
@@ -680,7 +690,7 @@ function choices() {
   // Notices typed by the marketer have no fixed wording to look for, so they are checked as content to include.
   return {pains: chosen("pain"), conditions: cond.filter((id) => !id.startsWith("USER-")), must_include: [...chosen("must"), ...cond.filter((id) => id.startsWith("USER-"))].slice(0, 10), emphasize: emphasized()};
 }
-function makeOptions() { return {target_id: S.target, live: !$("useStored").checked, include_price: $("incPrice").checked, ...choices()}; }
+function makeOptions() { return {target_id: S.target, live: !$("useStored").checked, include_price: $("incPrice").checked, experience_slot: !!S.slot, ...choices()}; }
 function wireAdd(inputId, buttonId, kind, apiKind) {
   $(buttonId).addEventListener("click", () => {
     const statement = $(inputId).value.trim();

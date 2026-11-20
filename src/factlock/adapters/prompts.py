@@ -17,9 +17,10 @@ How to write
 - Output blocks. A "sentence" block is one or two Korean sentences with the ids of the facts it relies on.
 - A sentence with no fact ids must contain no number, price, product name or superlative. Use those for
   transitions only.
-- Do not invent customer stories, statistics, test results or personal experience. Where the guideline
-  asks for a hands-on review, add one "experience_slot" block whose text tells the human reviewer what to
-  write there. A person fills it in later.
+- Do not invent customer stories, statistics, test results or personal experience.
+- If "experience_slot" in the request is true, add exactly one "experience_slot" block whose text tells
+  the human reviewer what to write there; a person fills it in later. If it is false, add no
+  "experience_slot" block at all and write the piece as an introduction based on the company's materials.
 - Product facts list "trigger_words". Any sentence or heading containing one of those words must carry
   that product fact's id, otherwise the rule engine deletes it.
 - Copy numbers and prices exactly as the fact states them. Do not round, convert or add them up.
@@ -93,6 +94,7 @@ def build_prompt(request: DraftRequest) -> str:
     ]
     applies = not request.guideline.targets or request.target.id in request.guideline.targets
     payload = {
+        "experience_slot": request.experience_slot,
         "target": {
             "name": request.target.name,
             "pain_fact_ids": list(request.target.pains),

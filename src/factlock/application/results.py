@@ -13,6 +13,7 @@ class Choices:
     include_price: bool = False
     must_include: tuple[str, ...] = ()
     emphasize: tuple[str, ...] = ()
+    experience_slot: bool = False
     pains: tuple[str, ...] | None = None
     conditions: tuple[str, ...] | None = None
 

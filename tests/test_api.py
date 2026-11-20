@@ -100,15 +100,22 @@ def test_live_failure_falls_back_to_stored_draft(tmp_path: Path) -> None:
     assert data["source"] == "stored"
     assert data["fallback_code"] == "claude_unreachable"
     assert data["dropped"] == []
-    assert data["report"]["counts"]["fail"] == 1  # only the unfilled experience slot
+    assert data["report"]["counts"]["fail"] == 0  # no experience slot unless asked for
 
 
 @pytest.mark.parametrize("target", ["field-sales", "remote-callcenter"])
 def test_stored_drafts_survive_the_fact_lock(tmp_path: Path, target: str) -> None:
-    data = make_client(tmp_path, None).post("/api/drafts", json={"target_id": target, "include_price": True}).json()
+    client = make_client(tmp_path, None)
+    data = client.post("/api/drafts", json={"target_id": target, "include_price": True}).json()
     assert data["dropped"] == []
-    failed = [r["rule"] for r in data["report"]["results"] if r["verdict"] == "fail"]
-    assert failed == ["R8"]
+    assert [r["rule"] for r in data["report"]["results"] if r["verdict"] == "fail"] == []
+    assert not [b for b in data["blocks"] if b["type"] == "experience_slot"]
+
+    asked = {"target_id": target, "include_price": True, "experience_slot": True}
+    with_slot = client.post("/api/drafts", json=asked).json()
+    assert [b["type"] for b in with_slot["blocks"]].count("experience_slot") == 1
+    failed = [r["rule"] for r in with_slot["report"]["results"] if r["verdict"] == "fail"]
+    assert failed == ["R8"]  # the blank must be filled by a person before export
 
 
 def test_review_flags_wrong_setup_fee(tmp_path: Path) -> None:

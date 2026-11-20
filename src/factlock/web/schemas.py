@@ -20,6 +20,7 @@ class DraftIn(BaseModel):
     pains: list[str] | None = Field(default=None, max_length=10)
     conditions: list[str] | None = Field(default=None, max_length=20)
     emphasize: list[str] = Field(default_factory=list, max_length=10)
+    experience_slot: bool = False
 
 
 class SlideIn(BaseModel):
@@ -66,6 +67,7 @@ def choices_from(body: Any) -> Choices:
         include_price=getattr(body, "include_price", False),
         must_include=tuple(body.must_include),
         emphasize=tuple(body.emphasize),
+        experience_slot=getattr(body, "experience_slot", False),
         pains=tuple(pains) if pains is not None else None,
         conditions=tuple(conditions) if conditions is not None else None,
     )

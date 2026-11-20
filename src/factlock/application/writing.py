@@ -1,6 +1,7 @@
 """Produce the two outputs: a blog post and an Instagram carousel. Each goes through the fact lock."""
 
 from collections.abc import Callable
+from dataclasses import replace
 
 from factlock.application.briefing import WriterBrief
 from factlock.application.catalog import FactCatalog
@@ -59,6 +60,7 @@ class BlogWriting:
         live, include_price, must_include = choices.live, choices.include_price, choices.must_include
         pick = self._catalog.must_include
         request = self._brief.request(target, include_price, pick(must_include), pick(choices.emphasize))
+        request = replace(request, experience_slot=choices.experience_slot)
         live_writer = self._live
         raw, fallback_code = write_with_fallback(
             live,
@@ -67,6 +69,8 @@ class BlogWriting:
         )
         if not include_price:
             raw = self._brief.draft_without_prices(raw, target)
+        if not choices.experience_slot:
+            raw = replace(raw, blocks=tuple(block for block in raw.blocks if block.type != "experience_slot"))
         facts = self._catalog.all()
         draft, dropped = lock_draft(raw, facts)
         body = render_body(draft, self._guidelines.current, facts)

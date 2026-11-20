@@ -164,6 +164,7 @@ class DraftRequest:
     include_price: bool = True
     must_include: tuple[str, ...] = ()  # fact ids the marketer wants in the copy
     emphasize: tuple[str, ...] = ()  # fact ids the marketer wants the copy to lead with
+    experience_slot: bool = False  # leave a blank for a person to write a hands-on account
 
 
 @dataclass(frozen=True)
