@@ -10,12 +10,30 @@
 - '최고', '유일' 같은 최상급과 비교 표현은 근거 사실이 있을 때만 씁니다.
 - 조건이 붙은 사실은 조건과 함께 씁니다.
 
-## 구조
+## 구조: 클린 아키텍처
 
-- `domain`은 순수 Python입니다. FastAPI, DB, AI 연결 코드를 넣지 않습니다.
-- `ports`는 `domain`만, `application`은 `domain`과 `ports`만 의존합니다.
-- AI 호출과 파일·DB 접근은 `adapters`에 둡니다.
-- 검수 통과 여부는 AI가 아니라 규칙이 정합니다.
+의존은 안쪽으로만 향합니다. `tests/test_architecture.py`가 이 규칙을 자동으로 검사하므로, 어기면 테스트가 실패합니다.
+
+| 계층 | 폴더 | 들어가는 것 | 불러와도 되는 것 |
+|---|---|---|---|
+| 규칙 | `domain` | 사실, 타깃, 글의 모양과 검수 규칙 | 표준 라이브러리만 |
+| 연결 약속 | `ports` | 바깥과 주고받는 약속(Protocol)과 오류 | `domain` |
+| 업무 흐름 | `application` | 유스케이스(타깃, 글쓰기, 검수, 문서 분석) | `domain`, `ports` |
+| 바깥 연결 | `adapters` | 파일·DB, AI, 엑셀·문서 읽기 | `domain`, `ports` |
+| 웹 | `web` | 요청과 응답, 화면 | `domain`, `ports`, `application` |
+
+- 구체적인 어댑터를 만드는 곳은 `web/main.py`(조립 지점) 하나뿐입니다. 다른 파일은 어댑터를 직접 불러오지 않습니다.
+- `domain`, `ports`, `application`에는 FastAPI, pydantic, anthropic, openpyxl 같은 외부 패키지를 넣지 않습니다.
+- 검수 통과 여부는 AI가 아니라 `domain`의 규칙이 정합니다. AI의 답은 항상 사실 목록과 대조한 뒤에만 씁니다.
+
+## 설계: 객체지향 원칙
+
+- **한 클래스는 한 가지 일만 합니다.** 유스케이스마다 클래스를 따로 둡니다(`FactCatalog`, `TargetBook`, `BlogWriting`, `CarouselWriting`, `Reviewing`, `DocumentIngestion`). `FactLockService`는 이들을 이어 주기만 하고 판단을 하지 않습니다.
+- **구체 클래스가 아니라 약속에 기대어 짭니다.** 바깥 기능이 필요하면 `ports`에 작은 Protocol을 만들고 생성자로 받습니다.
+- **상속보다 조합을 씁니다.** 공통 부모 클래스를 만들지 않고, 필요한 객체를 생성자로 넘겨 받습니다.
+- **값은 바꾸지 않습니다.** `domain`의 데이터는 `frozen` dataclass입니다. 바꿀 때는 새 값을 만듭니다.
+- **파일 하나는 400줄을 넘기지 않습니다.** 넘으면 책임을 나눕니다. 이것도 테스트가 검사합니다.
+- 새 기능은 기존 클래스를 고치기보다 새 유스케이스나 새 어댑터를 더하는 쪽으로 넣습니다.
 
 ## 안전
 

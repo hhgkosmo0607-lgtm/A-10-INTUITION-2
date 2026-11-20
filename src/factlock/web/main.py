@@ -20,6 +20,8 @@ from factlock.adapters.ai_steps import (
     AiTargetPlanner,
 )
 from factlock.adapters.asset_store import FileAssetStore
+from factlock.adapters.doc_text import OfficeDocumentReader
+from factlock.adapters.document_library import FileDocumentLibrary
 from factlock.adapters.extra_facts import JsonExtraFacts
 from factlock.adapters.json_repo import JsonCompanyData
 from factlock.adapters.sqlite_store import SqliteDraftStore
@@ -50,6 +52,7 @@ def build() -> FastAPI:
     choice = os.environ.get("FACTLOCK_AI", "auto")
     engine = ai_engine(choice)  # quick steps: target plan and meaning review
     writer = ai_engine(choice, "medium")  # the draft gets more thinking time
+    reader = OfficeDocumentReader()
     service = FactLockService(
         company.all(),
         company.targets(),
@@ -63,11 +66,13 @@ def build() -> FastAPI:
         JsonExtraFacts(Path(os.environ.get("FACTLOCK_EXTRA_FACTS", ROOT / "var" / "extra_facts.json"))),
         AiCarouselWriter(writer) if writer else None,
         StoredCarouselWriter(folder / "carousels"),
+        reader,
+        FileDocumentLibrary(Path(os.environ.get("FACTLOCK_DOCUMENTS", ROOT / "var" / "documents"))),
     )
     brand_file = folder / "brand.json"
     brand = json.loads(brand_file.read_text(encoding="utf-8")) if brand_file.is_file() else None
     assets = FileAssetStore(Path(os.environ.get("FACTLOCK_ASSETS", ROOT / "var" / "assets")))
-    return create_app(service, XlsxGuidelineReader(), engine.name if engine else "", brand, assets)
+    return create_app(service, XlsxGuidelineReader(), engine.name if engine else "", brand, assets, reader.max_bytes)
 
 
 app = build()

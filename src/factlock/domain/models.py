@@ -124,6 +124,28 @@ class Carousel:
 
 
 @dataclass(frozen=True)
+class Asset:
+    """A promo image the company owns (product screen, photo)."""
+
+    id: str
+    caption: str
+    filename: str
+    content_type: str
+    stored_as: str
+
+
+@dataclass(frozen=True)
+class StoredDocument:
+    """An internal document kept in the library so its facts can be traced back and re-read."""
+
+    id: str
+    filename: str
+    pages: int
+    added: str
+    stored_as: str
+
+
+@dataclass(frozen=True)
 class DraftRequest:
     target: Target
     guideline: Guideline

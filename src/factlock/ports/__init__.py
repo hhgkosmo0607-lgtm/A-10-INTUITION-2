@@ -1,9 +1,20 @@
 """Contracts the application layer depends on. Adapters implement them."""
 
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any, Protocol
 
-from factlock.domain.models import Carousel, Draft, DraftRequest, Fact, Guideline, ReviewReport, Target
+from factlock.domain.models import (
+    Asset,
+    Carousel,
+    Draft,
+    DraftRequest,
+    Fact,
+    Guideline,
+    ReviewReport,
+    StoredDocument,
+    Target,
+)
 
 
 class FactRepository(Protocol):
@@ -108,3 +119,43 @@ class ExtraFactStore(Protocol):
     def load(self) -> list[Fact]: ...
 
     def save(self, facts: list[Fact]) -> None: ...
+
+
+class DocumentReader(Protocol):
+    """Turns an uploaded document into (locator, text) pages. Raises DocumentError."""
+
+    max_bytes: int
+
+    def read(self, filename: str, data: bytes) -> list[tuple[str, str]]: ...
+
+
+class AssetError(Exception):
+    """A promo image could not be stored. Carries a fixed code, never file content."""
+
+    def __init__(self, code: str) -> None:
+        super().__init__(code)
+        self.code = code
+
+
+class AssetLibrary(Protocol):
+    max_bytes: int
+
+    def all(self) -> list[Asset]: ...
+
+    def add(self, filename: str, data: bytes, caption: str) -> Asset: ...
+
+    def get(self, asset_id: str) -> tuple[Asset, Path] | None: ...
+
+    def delete(self, asset_id: str) -> bool: ...
+
+
+class DocumentLibrary(Protocol):
+    """Keeps the original files of analysed documents."""
+
+    def all(self) -> list[StoredDocument]: ...
+
+    def add(self, filename: str, data: bytes, pages: int) -> StoredDocument: ...
+
+    def get(self, document_id: str) -> tuple[StoredDocument, Path] | None: ...
+
+    def delete(self, document_id: str) -> bool: ...

@@ -8,7 +8,8 @@ import pytest
 from fastapi.testclient import TestClient
 from openpyxl import Workbook
 
-from factlock.adapters.doc_text import MAX_BYTES, read_document
+from factlock.adapters.doc_text import MAX_BYTES, OfficeDocumentReader, read_document
+from factlock.adapters.document_library import FileDocumentLibrary
 from factlock.adapters.extra_facts import JsonExtraFacts
 from factlock.adapters.json_repo import JsonCompanyData
 from factlock.adapters.sqlite_store import SqliteDraftStore
@@ -44,6 +45,7 @@ def client(tmp_path: Path, extractor: FakeExtractor | None = None) -> TestClient
     service = FactLockService(
         company.all(), company.targets(), company.current(), None, StoredDraftWriter(DATA / "drafts"),
         SqliteDraftStore(tmp_path / "t.db"), None, None, extractor, JsonExtraFacts(tmp_path / "extra.json"),
+        document_reader=OfficeDocumentReader(), document_library=FileDocumentLibrary(tmp_path / "docs"),
     )  # fmt: skip
     return TestClient(create_app(service, XlsxGuidelineReader(), "fake"))
 
@@ -83,10 +85,10 @@ def test_unreadable_documents_give_fixed_codes(name: str, data: bytes, code: str
 def test_only_facts_quoted_from_the_document_are_kept_and_stay_pending(tmp_path: Path) -> None:
     c = client(tmp_path, FakeExtractor())
     data = c.post("/api/documents", files={"file": ("안내.txt", DOC.encode())}).json()
-    assert [f["statement"] for f in data["added"]] == ["프리미엄 요금제는 월 77,000원입니다."]
-    assert data["added"][0]["status"] == "pending"
-    assert data["added"][0]["source"] == "안내.txt 본문"
-    assert data["added"][0]["quote"] == "프리미엄 요금제는 월 77,000원입니다."
+    assert [f["statement"] for f in data["added_facts"]] == ["프리미엄 요금제는 월 77,000원입니다."]
+    assert data["added_facts"][0]["status"] == "pending"
+    assert data["added_facts"][0]["source"] == "안내.txt 본문"
+    assert data["added_facts"][0]["quote"] == "프리미엄 요금제는 월 77,000원입니다."
     reasons = [r["reason"] for r in data["rejected"]]
     assert reasons == ["문장의 숫자가 인용한 원문에 없습니다.", "인용한 원문을 문서에서 찾지 못했습니다."]
 
@@ -94,7 +96,7 @@ def test_only_facts_quoted_from_the_document_are_kept_and_stay_pending(tmp_path:
     before = c.post("/api/review", json={"title": "t", "body": body}).json()
     assert next(r for r in before["results"] if r["rule"] == "R5")["verdict"] == "fail"  # pending is not usable
 
-    fact_id = data["added"][0]["id"]
+    fact_id = data["added_facts"][0]["id"]
     assert c.post(f"/api/facts/{fact_id}/confirm").json()["status"] == "confirmed"
     after = c.post("/api/review", json={"title": "t", "body": body}).json()
     assert next(r for r in after["results"] if r["rule"] == "R5")["verdict"] == "pass"
@@ -104,7 +106,7 @@ def test_only_facts_quoted_from_the_document_are_kept_and_stay_pending(tmp_path:
 
 def test_confirmed_document_facts_survive_a_restart_and_can_be_discarded(tmp_path: Path) -> None:
     c = client(tmp_path, FakeExtractor())
-    fact_id = c.post("/api/documents", files={"file": ("안내.txt", DOC.encode())}).json()["added"][0]["id"]
+    fact_id = c.post("/api/documents", files={"file": ("안내.txt", DOC.encode())}).json()["added_facts"][0]["id"]
     c.post(f"/api/facts/{fact_id}/confirm")
     again = client(tmp_path)
     assert any(f["id"] == fact_id and f["status"] == "confirmed" for f in again.get("/api/facts").json())
@@ -116,3 +118,27 @@ def test_document_upload_without_ai_explains(tmp_path: Path) -> None:
     response = client(tmp_path).post("/api/documents", files={"file": ("안내.txt", DOC.encode())})
     assert response.status_code == 503
     assert response.json()["detail"]["code"] == "ai_not_configured"
+
+
+def test_document_is_kept_linked_to_its_facts_and_removed_with_them(tmp_path: Path) -> None:
+    c = client(tmp_path, FakeExtractor())
+    added = c.post("/api/documents", files={"file": ("안내.txt", DOC.encode())}).json()
+    assert added["filename"] == "안내.txt" and added["facts"] == 1 and added["pending"] == 1
+    assert added["added_facts"][0]["url"] == added["url"]  # the fact points back to the stored original
+    assert c.get(added["url"]).content == DOC.encode()
+    assert [d["id"] for d in c.get("/api/documents").json()] == [added["id"]]
+
+    again = c.post(f"/api/documents/{added['id']}/analyze").json()
+    assert again["added_facts"] == [] and again["facts"] == 1  # nothing new the second time
+
+    gone = c.delete(f"/api/documents/{added['id']}").json()
+    assert gone["facts_removed"] == 1
+    assert c.get("/api/documents").json() == []
+    assert not [f for f in c.get("/api/facts").json() if f["id"].startswith("DOC-")]
+    assert c.get(added["url"]).status_code == 404
+
+
+def test_unreadable_upload_is_not_stored(tmp_path: Path) -> None:
+    c = client(tmp_path, FakeExtractor())
+    assert c.post("/api/documents", files={"file": ("a.hwp", b"x")}).status_code == 400
+    assert c.get("/api/documents").json() == []

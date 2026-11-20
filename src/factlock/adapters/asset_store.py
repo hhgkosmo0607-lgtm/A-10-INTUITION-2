@@ -2,28 +2,14 @@
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
+
+from factlock.domain.models import Asset
+from factlock.ports import AssetError
 
 MAX_BYTES = 10 * 1024 * 1024
 MAX_ITEMS = 200
-
-
-@dataclass(frozen=True)
-class Asset:
-    id: str
-    caption: str
-    filename: str
-    content_type: str
-    stored_as: str
-
-
-class AssetError(Exception):
-    """Carries a fixed code, never file content."""
-
-    def __init__(self, code: str) -> None:
-        super().__init__(code)
-        self.code = code
 
 
 def _kind(data: bytes) -> tuple[str, str]:
@@ -37,6 +23,8 @@ def _kind(data: bytes) -> tuple[str, str]:
 
 
 class FileAssetStore:
+    max_bytes = MAX_BYTES
+
     def __init__(self, folder: Path) -> None:
         self._folder = folder
         self._index = folder / "index.json"

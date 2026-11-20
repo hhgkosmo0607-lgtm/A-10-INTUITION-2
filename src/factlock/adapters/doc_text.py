@@ -88,3 +88,12 @@ def read_document(filename: str, data: bytes) -> list[Page]:
     if not pages:
         raise DocumentError("document_has_no_text")
     return pages
+
+
+class OfficeDocumentReader:
+    """Implements ports.DocumentReader for PDF, PowerPoint, Word, Excel and text files."""
+
+    max_bytes = MAX_BYTES
+
+    def read(self, filename: str, data: bytes) -> list[tuple[str, str]]:
+        return [(page.locator, page.text) for page in read_document(filename, data)]
